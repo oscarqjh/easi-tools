@@ -16,6 +16,9 @@ from pathlib import Path
 
 _CKPT_NUM_RE = re.compile(r"checkpoint-(\d+)$")
 
+# Default config path: autoeval.yaml next to the autoeval/ package
+_DEFAULT_CONFIG = Path(__file__).resolve().parent.parent / "autoeval.yaml"
+
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments — just the config file path."""
@@ -23,7 +26,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Watch for training checkpoints and run easi evaluations",
     )
     parser.add_argument(
-        "--config", default="autoeval.yaml",
+        "--config", default=str(_DEFAULT_CONFIG),
         help="Path to YAML config file (default: autoeval.yaml)",
     )
     return parser.parse_args(argv)
