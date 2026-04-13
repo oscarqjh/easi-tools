@@ -1,0 +1,28 @@
+# autoeval.yaml — control panel for checkpoint watcher
+# Edit while watcher is running; changes take effect after current eval finishes.
+
+# Directories to scan for checkpoint-* subdirectories
+target_dirs:
+  - /mnt/aigc/users/yinwanqi/00-storage/InternVL/LHVLN_DFS
+
+# Output and results
+output_dir: ./logs
+results_dir: null          # null = don't move results
+scan_interval: 600         # seconds between scans when idle
+zip_images: false          # zip PNGs per episode when moving
+zip_all_images: false      # zip ALL PNGs into one file when moving
+
+# easi start options
+tasks:
+  - lhpr_vln_unseen_val_filtered_sft
+agent: react
+backend: vllm
+num_parallel: 8
+sim_gpus: "0,1"
+llm_instances: 1
+llm_gpus: "2,3"
+llm_kwargs:
+  tensor_parallel_size: 2
+  trust_remote_code: true
+  startup_timeout: 600
+verbosity: TRACE
