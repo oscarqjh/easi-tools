@@ -1,0 +1,11 @@
+[project]
+name = "easi-tools"
+version = "0.1.0"
+description = "Internal tools for EASI evaluation framework"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
