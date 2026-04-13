@@ -6,84 +6,14 @@ from unittest.mock import patch, MagicMock
 from autoeval.watcher import parse_args
 
 
-def test_parse_args_basic():
-    args = parse_args([
-        "/tmp/checkpoints",
-        "--output-dir", "/tmp/logs",
-        "--results-dir", "/tmp/results",
-        "--scan-interval", "300",
-        "--",
-        "easi", "start", "--tasks", "task_a,task_b",
-        "--agent", "react",
-        "--backend", "vllm",
-    ])
-    assert args.target_dirs == ["/tmp/checkpoints"]
-    assert args.output_dir == "/tmp/logs"
-    assert args.results_dir == "/tmp/results"
-    assert args.scan_interval == 300
-    assert args.task_names == ["task_a", "task_b"]
+def test_parse_args_default_config():
+    args = parse_args([])
+    assert args.config == "autoeval.yaml"
 
 
-def test_parse_args_positional_tasks():
-    args = parse_args([
-        "/tmp/checkpoints",
-        "--",
-        "easi", "start", "task_a", "task_b",
-        "--backend", "vllm",
-    ])
-    assert args.task_names == ["task_a", "task_b"]
-
-
-def test_parse_args_single_task():
-    args = parse_args([
-        "/tmp/checkpoints",
-        "--",
-        "easi", "start", "my_task",
-    ])
-    assert args.task_names == ["my_task"]
-    assert args.output_dir == "./logs"
-    assert args.results_dir is None
-    assert args.scan_interval == 600
-
-
-def test_parse_args_multiple_target_dirs():
-    args = parse_args([
-        "/tmp/dir1", "/tmp/dir2", "/tmp/dir3",
-        "--output-dir", "/tmp/logs",
-        "--",
-        "easi", "start", "--tasks", "my_task",
-    ])
-    assert args.target_dirs == ["/tmp/dir1", "/tmp/dir2", "/tmp/dir3"]
-
-
-def test_parse_args_no_easi_cmd_raises():
-    """Missing -- separator should raise SystemExit."""
-    import pytest
-    with pytest.raises(SystemExit):
-        parse_args(["/tmp/checkpoints"])
-
-
-def test_parse_args_strips_tasks_from_cmd():
-    """easi_cmd_base should not contain task names or --tasks flag."""
-    args = parse_args([
-        "/tmp/ckpts",
-        "--",
-        "easi", "start", "--tasks", "task_a,task_b",
-        "--backend", "vllm", "--agent", "react",
-    ])
-    assert args.easi_cmd_base == ["easi", "start", "--backend", "vllm", "--agent", "react"]
-    assert "--tasks" not in args.easi_cmd_base
-
-
-def test_parse_args_strips_positional_tasks_from_cmd():
-    args = parse_args([
-        "/tmp/ckpts",
-        "--",
-        "easi", "start", "task_a", "task_b",
-        "--backend", "vllm",
-    ])
-    assert args.easi_cmd_base == ["easi", "start", "--backend", "vllm"]
-    assert "task_a" not in args.easi_cmd_base
+def test_parse_args_custom_config():
+    args = parse_args(["--config", "my_config.yaml"])
+    assert args.config == "my_config.yaml"
 
 
 def test_discover_checkpoints(tmp_path):
