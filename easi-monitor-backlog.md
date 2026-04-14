@@ -1,27 +1,27 @@
 # easi-monitor Backlog
 
-## Phase 1: MVP (Current)
+## Phase 1: MVP (Complete)
 - [x] Design spec
-- [ ] Project scaffolding (Next.js, Tailwind, shadcn/ui)
-- [ ] TypeScript types for EASI data schemas
-- [ ] Data discovery library (scan logs directory)
-- [ ] API routes (tasks, runs, episodes, trajectory, frame, thumbnails)
-- [ ] Zip image extraction support
-- [ ] Dashboard page (task/run selectors, metrics panel)
-- [ ] Run comparison chart (dynamic metric selection, Recharts)
-- [ ] Episode list view (default) with filtering and sorting
-- [ ] Episode card view with thumbnails
-- [ ] List/card view toggle
-- [ ] Trajectory viewer page
-- [ ] Frame viewer with playback controls and scrubber
-- [ ] Timeline event markers (fallback, subtask completion)
-- [ ] Multi-camera selector
-- [ ] Metadata panel (all fields, always visible)
-- [ ] Collapsible LLM response (code block)
-- [ ] Prompt reconstruction: DefaultPromptBuilder
-- [ ] Prompt reconstruction: SFTPromptBuilder
-- [ ] Frame prefetching and LRU cache
-- [ ] Thumbnail generation and caching
+- [x] Project scaffolding (Next.js 16, Tailwind v4, shadcn/ui v4)
+- [x] TypeScript types for EASI data schemas
+- [x] Data discovery library (scan logs directory)
+- [x] API routes (tasks, runs, episodes, trajectory, frame)
+- [x] Zip image extraction support
+- [x] Dashboard page (task/run selectors, metrics panel)
+- [x] Run comparison chart (dynamic metric selection, Recharts)
+- [x] Episode list view (default) with filtering and sorting
+- [x] Episode card view with thumbnails
+- [x] List/card view toggle
+- [x] Trajectory viewer page
+- [x] Frame viewer with playback controls and scrubber
+- [x] Timeline event markers (fallback, subtask completion)
+- [x] Multi-camera selector
+- [x] Metadata panel (all fields, always visible)
+- [x] Collapsible LLM response (code block)
+- [x] Prompt reconstruction: DefaultPromptBuilder
+- [x] Prompt reconstruction: SFTPromptBuilder
+- [x] Frame prefetching and LRU cache
+- [ ] Thumbnail generation and caching (deferred)
 
 ## Phase 2: Comparison and Analytics
 - [ ] Side-by-side episode comparison (two trajectory viewers)
