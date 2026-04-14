@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { SkipBack, ChevronLeft, Play, Pause, ChevronRight, SkipForward } from "lucide-react";
 
 interface Props {
   currentStep: number;
@@ -29,12 +30,22 @@ export function PlaybackControls({
         className="w-full"
       />
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => onStepChange(0)}>|&lt;</Button>
-          <Button size="sm" variant="outline" onClick={() => onStepChange(Math.max(0, currentStep - 1))}>&lt;</Button>
-          <Button size="sm" variant="default" onClick={onPlayPause}>{playing ? "||" : ">"}</Button>
-          <Button size="sm" variant="outline" onClick={() => onStepChange(Math.min(maxStep, currentStep + 1))}>&gt;</Button>
-          <Button size="sm" variant="outline" onClick={() => onStepChange(maxStep)}>&gt;|</Button>
+        <div className="flex items-center gap-1 border rounded-lg p-1">
+          <Button size="icon-sm" variant="ghost" onClick={() => onStepChange(0)}>
+            <SkipBack className="size-3.5" />
+          </Button>
+          <Button size="icon-sm" variant="ghost" onClick={() => onStepChange(Math.max(0, currentStep - 1))}>
+            <ChevronLeft className="size-4" />
+          </Button>
+          <Button size="icon-sm" variant="default" onClick={onPlayPause}>
+            {playing ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+          </Button>
+          <Button size="icon-sm" variant="ghost" onClick={() => onStepChange(Math.min(maxStep, currentStep + 1))}>
+            <ChevronRight className="size-4" />
+          </Button>
+          <Button size="icon-sm" variant="ghost" onClick={() => onStepChange(maxStep)}>
+            <SkipForward className="size-3.5" />
+          </Button>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm font-mono text-muted-foreground">{currentStep} / {maxStep}</span>

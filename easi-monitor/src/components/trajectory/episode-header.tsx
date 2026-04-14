@@ -34,13 +34,21 @@ export function EpisodeHeader({ task, run, ep }: Props) {
   const success = (result.task_success ?? 0) as number;
 
   return (
-    <div className="border rounded-lg p-4 space-y-3">
-      <p className="text-sm">{result.instruction}</p>
-      <div className="flex flex-wrap gap-2 text-xs">
-        <Badge variant={success > 0 ? "default" : "destructive"}>{success > 0 ? "Success" : "Failed"}</Badge>
+    <div className="border rounded-lg p-5 space-y-4">
+      <div className="flex items-center gap-3">
+        <span className="font-mono text-sm font-bold text-muted-foreground">{ep}</span>
+        <Badge variant={success > 0 ? "default" : "destructive"}>
+          {success > 0 ? "Success" : "Failed"}
+        </Badge>
         {result.forced_early_stop && <Badge variant="secondary">Early Stop</Badge>}
+      </div>
+
+      <p className="text-base leading-relaxed">{result.instruction}</p>
+
+      <div className="flex flex-wrap gap-2 text-xs">
         {typeof result.num_steps === "number" && <Badge variant="outline">{Math.round(result.num_steps as number)} steps</Badge>}
         {typeof result.elapsed_seconds === "number" && <Badge variant="outline">{Math.round(result.elapsed_seconds)}s</Badge>}
+        <span className="w-px h-4 bg-border self-center" />
         {result.llm_usage && (
           <>
             {result.llm_usage.num_calls && <Badge variant="outline">{result.llm_usage.num_calls} LLM calls</Badge>}
@@ -48,8 +56,9 @@ export function EpisodeHeader({ task, run, ep }: Props) {
           </>
         )}
       </div>
+
       {config && (
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground border-t pt-3">
           Model: {config.cli_options.model} | Backend: {config.resolved_backend}
         </div>
       )}

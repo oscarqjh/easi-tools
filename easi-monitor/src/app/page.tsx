@@ -12,7 +12,41 @@ import { ViewToggle, type ViewMode } from "@/components/dashboard/view-toggle";
 import {
   EpisodeFilters, type StatusFilter, type SortField, type SortDir,
 } from "@/components/dashboard/episode-filters";
+import { Card } from "@/components/ui/card";
 import { getEpisodeStatus } from "@/lib/episode-utils";
+import { Inbox } from "lucide-react";
+
+function MetricsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} className="p-4">
+          <div className="h-3 w-20 bg-muted rounded animate-pulse mb-3" />
+          <div className="h-7 w-16 bg-muted rounded animate-pulse" />
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function EpisodesSkeleton() {
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <div className="bg-muted px-4 py-2.5">
+        <div className="h-3 w-full bg-muted-foreground/10 rounded animate-pulse" />
+      </div>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex gap-4 px-4 py-3 border-b">
+          <div className="h-5 w-16 bg-muted rounded animate-pulse" />
+          <div className="h-5 w-24 bg-muted rounded animate-pulse" />
+          <div className="h-5 flex-1 bg-muted rounded animate-pulse" />
+          <div className="h-5 w-12 bg-muted rounded animate-pulse" />
+          <div className="h-5 w-12 bg-muted rounded animate-pulse" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { tasks, loading: tasksLoading } = useTasks();
@@ -53,12 +87,23 @@ export default function Dashboard() {
     });
 
   if (tasksLoading) {
-    return <div className="text-muted-foreground">Loading tasks...</div>;
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row gap-4 items-start">
+          <div className="flex flex-col gap-1.5">
+            <div className="h-3 w-8 bg-muted rounded animate-pulse" />
+            <div className="h-8 w-[300px] bg-muted rounded-lg animate-pulse" />
+          </div>
+        </div>
+        <MetricsSkeleton />
+      </div>
+    );
   }
 
   if (tasks.length === 0) {
     return (
       <div className="text-center py-20">
+        <Inbox className="size-12 text-muted-foreground/50 mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">No tasks found</h2>
         <p className="text-muted-foreground">
           Set EASI_LOGS_DIR environment variable to point to your evaluation logs directory.
@@ -68,21 +113,22 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex gap-4 items-center">
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row gap-4 items-start">
         <TaskSelector tasks={tasks} selected={selectedTask} onSelect={handleTaskChange} />
         {selectedTask && (
           <RunSelector runs={runs} selected={selectedRun} onSelect={setSelectedRun} />
         )}
       </div>
 
+      {selectedRun && !currentRun && <MetricsSkeleton />}
       {currentRun && <MetricsPanel summary={currentRun.summary} />}
 
       {selectedTask && runs.length > 1 && <MetricsChart runs={runs} />}
 
       {selectedRun && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="text-sm text-muted-foreground">
               {episodesLoading ? "Loading episodes..." : `${filteredEpisodes.length} of ${episodes.length} episodes`}
             </div>
@@ -95,7 +141,14 @@ export default function Dashboard() {
               <ViewToggle mode={viewMode} onChange={setViewMode} />
             </div>
           </div>
-          {viewMode === "list" ? (
+          {episodesLoading ? (
+            <EpisodesSkeleton />
+          ) : filteredEpisodes.length === 0 && episodes.length > 0 ? (
+            <div className="text-center py-12 border rounded-lg">
+              <Inbox className="size-8 text-muted-foreground/50 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No episodes match the current filters.</p>
+            </div>
+          ) : viewMode === "list" ? (
             <EpisodeList episodes={filteredEpisodes} task={selectedTask!} run={selectedRun} />
           ) : (
             <EpisodeCards episodes={filteredEpisodes} task={selectedTask!} run={selectedRun} />

@@ -23,7 +23,7 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
   const prompt = config ? reconstructPrompt(config, trajectory, currentStepIndex) : null;
 
   return (
-    <ScrollArea className="h-[700px]">
+    <ScrollArea className="h-[calc(100vh-300px)]">
       <div className="space-y-4 p-1">
         <div className="flex items-center justify-between">
           <span className="text-lg font-bold font-mono">Step {step.step} / {totalSteps - 1}</span>
@@ -32,14 +32,14 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
 
         {step.action && (
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Action</div>
+            <div className="text-sm font-semibold text-muted-foreground mb-1">Action</div>
             <div className="font-mono text-sm font-medium">{step.action}</div>
           </div>
         )}
 
         {step.triggered_fallback !== undefined && (
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Fallback</div>
+            <div className="text-sm font-semibold text-muted-foreground mb-1">Fallback</div>
             <Badge variant={step.triggered_fallback ? "destructive" : "outline"}>
               {step.triggered_fallback ? "Yes" : "No"}
             </Badge>
@@ -48,14 +48,16 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
 
         {info.feedback !== undefined && (
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Feedback</div>
+            <div className="text-sm font-semibold text-muted-foreground mb-1">Feedback</div>
             <div className="text-sm font-mono">{String(info.feedback)}</div>
           </div>
         )}
 
+        <div className="border-t pt-4" />
+
         {info.subtask_stage !== undefined && (
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Subtask Progress</div>
+            <div className="text-sm font-semibold text-muted-foreground mb-1">Subtask Progress</div>
             <div className="text-sm font-mono">Stage {String(info.subtask_stage)} / {String(info.subtask_total ?? "?")}</div>
             {info.subtask_successes != null && (
               <div className="text-xs text-muted-foreground mt-1">Successes: {String(info.subtask_successes)}</div>
@@ -65,14 +67,14 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
 
         {info.current_geo_distance !== undefined && (
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Geo Distance</div>
+            <div className="text-sm font-semibold text-muted-foreground mb-1">Geo Distance</div>
             <div className="text-sm font-mono">{Number(info.current_geo_distance).toFixed(2)}m</div>
           </div>
         )}
 
         {step.agent_pose && (
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Agent Pose</div>
+            <div className="text-sm font-semibold text-muted-foreground mb-1">Agent Pose</div>
             <div className="text-xs font-mono">
               x: {step.agent_pose[0]?.toFixed(2)}, y: {step.agent_pose[1]?.toFixed(2)}, z: {step.agent_pose[2]?.toFixed(2)}
             </div>
@@ -82,13 +84,15 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
           </div>
         )}
 
+        <div className="border-t pt-4" />
+
         <div>
-          <div className="text-xs text-muted-foreground mb-1">Reward</div>
+          <div className="text-sm font-semibold text-muted-foreground mb-1">Reward</div>
           <div className="text-sm font-mono">{step.reward}</div>
         </div>
 
         <div>
-          <div className="text-xs text-muted-foreground mb-1">Done</div>
+          <div className="text-sm font-semibold text-muted-foreground mb-1">Done</div>
           <Badge variant={step.done ? "default" : "outline"}>{step.done ? "Yes" : "No"}</Badge>
         </div>
 

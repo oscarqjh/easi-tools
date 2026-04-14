@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Activity } from "lucide-react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,12 +23,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`dark ${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <div className="min-h-screen bg-background">
-          <header className="border-b">
-            <div className="container mx-auto px-4 py-3">
-              <h1 className="text-lg font-semibold">easi-monitor</h1>
+          <header className="border-b bg-card">
+            <div className="max-w-7xl mx-auto px-4 py-4">
+              <h1 className="text-lg font-semibold flex items-center gap-2">
+                <Activity className="size-5 text-primary" />
+                easi-monitor
+              </h1>
             </div>
           </header>
-          <main className="container mx-auto px-4 py-6">{children}</main>
+          <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
         </div>
       </body>
     </html>

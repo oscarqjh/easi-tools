@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { PlaybackControls } from "./playback-controls";
 import { TimelineMarkers } from "./timeline-markers";
 import { frameCache } from "@/lib/frame-cache";
+import { Loader2 } from "lucide-react";
 import type { TrajectoryStep } from "@/types/easi";
 
 interface Props {
@@ -65,7 +66,7 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
 
   return (
     <div className="space-y-3">
-      <div className="aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+      <div className="aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center border border-border">
         {displayUrl ? (
           <img
             src={displayUrl}
@@ -73,7 +74,10 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
             className="max-w-full max-h-full object-contain"
           />
         ) : (
-          <span className="text-muted-foreground text-sm">Loading frame...</span>
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <Loader2 className="size-4 animate-spin" />
+            Loading frame...
+          </div>
         )}
       </div>
       <TimelineMarkers trajectory={trajectory} onStepClick={onStepChange} />

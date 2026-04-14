@@ -3,6 +3,7 @@
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { ArrowUp, ArrowDown } from "lucide-react";
 
 export type StatusFilter = "all" | "success" | "fail" | "early_stop";
 export type SortField = "episode" | "steps" | "time" | "success";
@@ -45,9 +46,10 @@ export function EpisodeFilters({
       </Select>
 
       <button
-        className="text-sm text-muted-foreground hover:text-foreground"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => onSortDirChange(sortDir === "asc" ? "desc" : "asc")}
       >
+        {sortDir === "asc" ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />}
         {sortDir === "asc" ? "Asc" : "Desc"}
       </button>
     </div>

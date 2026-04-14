@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { Home, ChevronRight } from "lucide-react";
 import { useTrajectory } from "@/lib/hooks";
 import { FrameViewer } from "@/components/trajectory/frame-viewer";
 import { MetadataPanel } from "@/components/trajectory/metadata-panel";
@@ -39,20 +40,23 @@ export default function EpisodePage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href="/" className="hover:text-foreground">Dashboard</Link>
-        <span>/</span>
+      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-foreground flex items-center gap-1">
+          <Home className="size-3.5" />
+          Dashboard
+        </Link>
+        <ChevronRight className="size-3.5" />
         <span>{task}</span>
-        <span>/</span>
+        <ChevronRight className="size-3.5" />
         <span className="font-mono">{run}</span>
-        <span>/</span>
-        <span className="font-mono">{ep}</span>
+        <ChevronRight className="size-3.5" />
+        <span className="font-mono text-foreground">{ep}</span>
       </div>
 
       <EpisodeHeader task={task} run={run} ep={ep} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <div className="md:col-span-3">
           <FrameViewer
             task={task} run={run} ep={ep}
             trajectory={trajectory}
@@ -61,7 +65,7 @@ export default function EpisodePage() {
             onStepChange={handleStepChange}
           />
         </div>
-        <div className="lg:col-span-2">
+        <div className="md:col-span-2">
           <MetadataPanel
             step={currentData}
             totalSteps={trajectory.length}

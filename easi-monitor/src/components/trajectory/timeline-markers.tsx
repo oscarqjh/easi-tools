@@ -38,16 +38,16 @@ export function TimelineMarkers({ trajectory, onStepClick }: Props) {
 
   if (markers.length === 0) return null;
 
-  const colors = { fallback: "bg-red-500", subtask: "bg-green-500", done: "bg-blue-500" };
+  const colors = { fallback: "bg-red-400", subtask: "bg-green-400", done: "bg-blue-400" };
 
   return (
     <TooltipProvider>
-      <div className="space-y-1">
-        <div className="relative h-3 w-full">
+      <div className="space-y-1.5">
+        <div className="relative h-4 w-full">
           {markers.map((m, i) => (
             <Tooltip key={`${m.type}-${m.step}-${i}`}>
               <TooltipTrigger
-                className={`absolute top-0 w-2 h-3 rounded-sm ${colors[m.type]} hover:opacity-80`}
+                className={`absolute top-0 w-3 h-4 rounded-sm cursor-pointer ${colors[m.type]} hover:opacity-80 hover:scale-110 transition-transform`}
                 style={{ left: `${(m.step / maxStep) * 100}%`, transform: "translateX(-50%)" }}
                 onClick={() => onStepClick(m.step)}
               />
@@ -56,9 +56,9 @@ export function TimelineMarkers({ trajectory, onStepClick }: Props) {
           ))}
         </div>
         <div className="flex gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-red-500 inline-block" /> Fallback</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-500 inline-block" /> Subtask</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-500 inline-block" /> End</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-red-400 inline-block" /> Fallback</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-green-400 inline-block" /> Subtask</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-blue-400 inline-block" /> End</span>
         </div>
       </div>
     </TooltipProvider>
