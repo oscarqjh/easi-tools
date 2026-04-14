@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PlaybackControls } from "./playback-controls";
 import { TimelineMarkers } from "./timeline-markers";
 import { frameCache } from "@/lib/frame-cache";
@@ -23,11 +23,30 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
   const currentStepRef = useRef(currentStep);
   currentStepRef.current = currentStep;
 
-  const frameUrl = frameCache.getUrl(task, run, ep, currentStep, camera);
+  // The displayed frame URL — may lag behind currentStep while loading
+  const [displayUrl, setDisplayUrl] = useState<string>("");
 
-  // Prefetch around current step
+  // Load current frame: use blob cache if available, otherwise fetch it
   useEffect(() => {
-    frameCache.prefetch(task, run, ep, currentStep, maxStep, camera);
+    const cached = frameCache.getCachedUrl(task, run, ep, currentStep, camera);
+    if (cached) {
+      setDisplayUrl(cached);
+    } else {
+      // Set API URL immediately (browser can start loading)
+      setDisplayUrl(frameCache.makeUrl(task, run, ep, currentStep, camera));
+      // Also fetch as blob for future cache hits
+      frameCache.fetchFrame(task, run, ep, currentStep, camera).then((blobUrl) => {
+        // Only update if still on the same step
+        if (currentStepRef.current === currentStep) {
+          setDisplayUrl(blobUrl);
+        }
+      });
+    }
+  }, [task, run, ep, currentStep, camera]);
+
+  // Debounced prefetch — only fires 150ms after last step change
+  useEffect(() => {
+    frameCache.schedulePrefetch(task, run, ep, currentStep, maxStep, camera);
   }, [task, run, ep, currentStep, maxStep, camera]);
 
   // Single playback interval
@@ -47,11 +66,15 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
   return (
     <div className="space-y-3">
       <div className="aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-        <img
-          src={frameUrl}
-          alt={`Step ${currentStep}`}
-          className="max-w-full max-h-full object-contain"
-        />
+        {displayUrl ? (
+          <img
+            src={displayUrl}
+            alt={`Step ${currentStep}`}
+            className="max-w-full max-h-full object-contain"
+          />
+        ) : (
+          <span className="text-muted-foreground text-sm">Loading frame...</span>
+        )}
       </div>
       <TimelineMarkers trajectory={trajectory} onStepClick={onStepChange} />
       <PlaybackControls
