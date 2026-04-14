@@ -3,19 +3,24 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { TrajectoryStep } from "@/types/easi";
+import { reconstructPrompt } from "@/lib/prompt-builders";
+import type { TrajectoryStep, RunConfig } from "@/types/easi";
 
 interface Props {
   step: TrajectoryStep | null;
   totalSteps: number;
+  config: RunConfig | null;
+  trajectory: TrajectoryStep[];
+  currentStepIndex: number;
 }
 
-export function MetadataPanel({ step, totalSteps }: Props) {
+export function MetadataPanel({ step, totalSteps, config, trajectory, currentStepIndex }: Props) {
   if (!step) {
     return <div className="text-sm text-muted-foreground p-4">No step data available</div>;
   }
 
   const info = step.info ?? {};
+  const prompt = config ? reconstructPrompt(config, trajectory, currentStepIndex) : null;
 
   return (
     <ScrollArea className="h-[700px]">
@@ -101,6 +106,32 @@ export function MetadataPanel({ step, totalSteps }: Props) {
             </AccordionItem>
           </Accordion>
         )}
+
+        <Accordion>
+          <AccordionItem value="prompt">
+            <AccordionTrigger className="text-xs text-muted-foreground py-2">
+              Reconstructed Prompt{!prompt && " (unavailable)"}
+            </AccordionTrigger>
+            <AccordionContent>
+              {prompt ? (
+                <div className="space-y-3">
+                  {prompt.map((msg, i) => (
+                    <div key={i}>
+                      <div className="text-xs font-semibold text-muted-foreground mb-1">[{msg.role}]</div>
+                      <pre className="text-xs font-mono bg-muted p-3 rounded whitespace-pre-wrap break-all max-h-[300px] overflow-auto">
+                        {msg.content}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Prompt reconstruction not available for this builder.
+                </p>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         {Object.keys(info).length > 0 && (
           <Accordion>

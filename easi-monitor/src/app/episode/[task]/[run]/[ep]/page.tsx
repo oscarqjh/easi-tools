@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useTrajectory } from "@/lib/hooks";
 import { FrameViewer } from "@/components/trajectory/frame-viewer";
 import { MetadataPanel } from "@/components/trajectory/metadata-panel";
 import { EpisodeHeader } from "@/components/trajectory/episode-header";
+import type { RunConfig } from "@/types/easi";
 
 export default function EpisodePage() {
   const params = useParams<{ task: string; run: string; ep: string }>();
@@ -17,6 +18,14 @@ export default function EpisodePage() {
   const { trajectory, loading } = useTrajectory(task, run, ep);
   const [currentStep, setCurrentStep] = useState(0);
   const [camera, setCamera] = useState("front");
+  const [config, setConfig] = useState<RunConfig | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}`)
+      .then((r) => r.json())
+      .then((data) => setConfig(data.config ?? null))
+      .catch(console.error);
+  }, [task, run]);
 
   const handleStepChange = useCallback((s: number) => {
     setCurrentStep(Math.max(0, Math.min(s, (trajectory.length || 1) - 1)));
@@ -53,7 +62,13 @@ export default function EpisodePage() {
           />
         </div>
         <div className="lg:col-span-2">
-          <MetadataPanel step={currentData} totalSteps={trajectory.length} />
+          <MetadataPanel
+            step={currentData}
+            totalSteps={trajectory.length}
+            config={config}
+            trajectory={trajectory}
+            currentStepIndex={currentStep}
+          />
         </div>
       </div>
     </div>
