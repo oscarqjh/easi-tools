@@ -32,14 +32,14 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
 
         {step.action && (
           <div>
-            <div className="text-sm font-semibold text-muted-foreground mb-1">Action</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Action</div>
             <div className="font-mono text-sm font-medium">{step.action}</div>
           </div>
         )}
 
         {step.triggered_fallback !== undefined && (
           <div>
-            <div className="text-sm font-semibold text-muted-foreground mb-1">Fallback</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Fallback</div>
             <Badge variant={step.triggered_fallback ? "destructive" : "outline"}>
               {step.triggered_fallback ? "Yes" : "No"}
             </Badge>
@@ -48,16 +48,16 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
 
         {info.feedback !== undefined && (
           <div>
-            <div className="text-sm font-semibold text-muted-foreground mb-1">Feedback</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Feedback</div>
             <div className="text-sm font-mono">{String(info.feedback)}</div>
           </div>
         )}
 
-        <div className="border-t pt-4" />
+        <div className="border-t border-border pt-4" />
 
         {info.subtask_stage !== undefined && (
           <div>
-            <div className="text-sm font-semibold text-muted-foreground mb-1">Subtask Progress</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Subtask Progress</div>
             <div className="text-sm font-mono">Stage {String(info.subtask_stage)} / {String(info.subtask_total ?? "?")}</div>
             {info.subtask_successes != null && (
               <div className="text-xs text-muted-foreground mt-1">Successes: {String(info.subtask_successes)}</div>
@@ -67,14 +67,14 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
 
         {info.current_geo_distance !== undefined && (
           <div>
-            <div className="text-sm font-semibold text-muted-foreground mb-1">Geo Distance</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Geo Distance</div>
             <div className="text-sm font-mono">{Number(info.current_geo_distance).toFixed(2)}m</div>
           </div>
         )}
 
         {step.agent_pose && (
           <div>
-            <div className="text-sm font-semibold text-muted-foreground mb-1">Agent Pose</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Agent Pose</div>
             <div className="text-xs font-mono">
               x: {step.agent_pose[0]?.toFixed(2)}, y: {step.agent_pose[1]?.toFixed(2)}, z: {step.agent_pose[2]?.toFixed(2)}
             </div>
@@ -84,15 +84,15 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
           </div>
         )}
 
-        <div className="border-t pt-4" />
+        <div className="border-t border-border pt-4" />
 
         <div>
-          <div className="text-sm font-semibold text-muted-foreground mb-1">Reward</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Reward</div>
           <div className="text-sm font-mono">{step.reward}</div>
         </div>
 
         <div>
-          <div className="text-sm font-semibold text-muted-foreground mb-1">Done</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Done</div>
           <Badge variant={step.done ? "default" : "outline"}>{step.done ? "Yes" : "No"}</Badge>
         </div>
 
@@ -103,7 +103,7 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
                 LLM Response
               </AccordionTrigger>
               <AccordionContent>
-                <pre className="text-xs font-mono bg-muted p-3 rounded whitespace-pre-wrap break-all max-h-[300px] overflow-auto">
+                <pre className="text-xs font-mono bg-card p-3 rounded-sm whitespace-pre-wrap break-all max-h-[300px] overflow-auto">
                   {step.llm_response}
                 </pre>
               </AccordionContent>
@@ -122,7 +122,7 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
                   {prompt.map((msg, i) => (
                     <div key={i}>
                       <div className="text-xs font-semibold text-muted-foreground mb-1">[{msg.role}]</div>
-                      <pre className="text-xs font-mono bg-muted p-3 rounded whitespace-pre-wrap break-all max-h-[300px] overflow-auto">
+                      <pre className="text-xs font-mono bg-card p-3 rounded-sm whitespace-pre-wrap break-all max-h-[300px] overflow-auto">
                         {msg.content}
                       </pre>
                     </div>
@@ -144,7 +144,7 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
                 All Info Fields ({Object.keys(info).length})
               </AccordionTrigger>
               <AccordionContent>
-                <pre className="text-xs font-mono bg-muted p-3 rounded whitespace-pre-wrap max-h-[300px] overflow-auto">
+                <pre className="text-xs font-mono bg-card p-3 rounded-sm whitespace-pre-wrap max-h-[300px] overflow-auto">
                   {JSON.stringify(info, null, 2)}
                 </pre>
               </AccordionContent>

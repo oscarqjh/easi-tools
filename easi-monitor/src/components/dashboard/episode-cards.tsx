@@ -1,9 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ImageIcon } from "lucide-react";
 import type { EpisodeInfo } from "@/types/easi";
 import { getEpisodeStatus } from "@/lib/episode-utils";
 
@@ -13,11 +10,11 @@ interface Props {
   run: string;
 }
 
-const statusConfig: Record<string, { label: string; variant: "default" | "destructive" | "secondary" | "outline" }> = {
-  success: { label: "Success", variant: "default" },
-  fail: { label: "Failed", variant: "destructive" },
-  early_stop: { label: "Early Stop", variant: "secondary" },
-  unknown: { label: "?", variant: "outline" },
+const statusConfig: Record<string, { label: string; badgeBg: string; borderColor: string }> = {
+  success: { label: "SUCCESS", badgeBg: "bg-[#34D399]", borderColor: "border-l-[#34D399]" },
+  fail: { label: "FAILED", badgeBg: "bg-[#F87171]", borderColor: "border-l-[#F87171]" },
+  early_stop: { label: "EARLY STOP", badgeBg: "bg-[#FBBF24]", borderColor: "border-l-[#FBBF24]" },
+  unknown: { label: "UNKNOWN", badgeBg: "bg-[#64748B]", borderColor: "border-l-[#64748B]" },
 };
 
 export function EpisodeCards({ episodes, task, run }: Props) {
@@ -26,19 +23,15 @@ export function EpisodeCards({ episodes, task, run }: Props) {
       {episodes.map((ep) => {
         const status = getEpisodeStatus(ep);
         const steps = ep.result?.num_steps as number | undefined;
-        const borderColor =
-          status === "success" ? "border-green-500" :
-          status === "fail" ? "border-red-500" :
-          status === "early_stop" ? "border-yellow-500" : "";
         const cfg = statusConfig[status] ?? statusConfig.unknown;
         return (
           <Link
             key={ep.episodeDir}
             href={`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}`}
           >
-            <Card className={`cursor-pointer border-l-4 ${borderColor} hover:scale-[1.02] hover:shadow-md transition-all duration-200`}>
-              <CardContent className="p-4">
-                <div className="relative aspect-video bg-muted rounded mb-2 overflow-hidden">
+            <div className={`cursor-pointer bg-card border border-border border-l-2 ${cfg.borderColor} rounded-sm hover:bg-[#252535] transition-colors`}>
+              <div className="p-4">
+                <div className="relative aspect-video bg-card rounded-sm mb-2 overflow-hidden">
                   {ep.hasImages ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
@@ -49,21 +42,21 @@ export function EpisodeCards({ episodes, task, run }: Props) {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="size-8 text-muted-foreground/40" />
+                      <span className="text-xs text-muted-foreground font-mono">[NO IMAGE]</span>
                     </div>
                   )}
                   <div className="absolute top-1.5 right-1.5">
-                    <Badge variant={cfg.variant} className="text-[10px] px-1.5 py-0">
+                    <span className={`${cfg.badgeBg} text-[#0A0A0F] text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-sm`}>
                       {cfg.label}
-                    </Badge>
+                    </span>
                   </div>
                 </div>
                 <div className="font-mono text-sm">{ep.episodeId}</div>
-                <div className="text-xs text-muted-foreground mt-1">
+                <div className="text-xs text-muted-foreground mt-1 font-sans">
                   {typeof steps === "number" ? `${Math.round(steps)} steps` : ""}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </Link>
         );
       })}

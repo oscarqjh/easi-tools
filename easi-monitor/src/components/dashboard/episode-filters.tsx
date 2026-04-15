@@ -26,8 +26,8 @@ export function EpisodeFilters({
   return (
     <div className="flex gap-3 items-center">
       <Select value={status} onValueChange={(v) => { if (v) onStatusChange(v as StatusFilter); }}>
-        <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
-        <SelectContent>
+        <SelectTrigger className="w-[140px] rounded-sm"><SelectValue /></SelectTrigger>
+        <SelectContent className="rounded-sm">
           <SelectItem value="all">All</SelectItem>
           <SelectItem value="success">Success</SelectItem>
           <SelectItem value="fail">Failed</SelectItem>
@@ -36,8 +36,8 @@ export function EpisodeFilters({
       </Select>
 
       <Select value={sortField} onValueChange={(v) => { if (v) onSortFieldChange(v as SortField); }}>
-        <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
-        <SelectContent>
+        <SelectTrigger className="w-[140px] rounded-sm"><SelectValue /></SelectTrigger>
+        <SelectContent className="rounded-sm">
           <SelectItem value="episode">Episode</SelectItem>
           <SelectItem value="steps">Steps</SelectItem>
           <SelectItem value="time">Time</SelectItem>

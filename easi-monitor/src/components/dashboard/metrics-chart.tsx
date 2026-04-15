@@ -72,11 +72,11 @@ export function MetricsChart({ runs }: Props) {
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" angle={-20} textAnchor="end" height={80} fontSize={12} />
-            <YAxis fontSize={12} />
-            <Tooltip />
-            <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#1C1C28" strokeOpacity={0.5} />
+            <XAxis dataKey="name" angle={-20} textAnchor="end" height={80} fontSize={12} tick={{ fill: '#64748B' }} />
+            <YAxis fontSize={12} tick={{ fill: '#64748B' }} />
+            <Tooltip contentStyle={{ backgroundColor: '#1C1C28', border: '1px solid #252535', borderRadius: '2px' }} />
+            <Bar dataKey="value" fill="#00D4AA" radius={[2, 2, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

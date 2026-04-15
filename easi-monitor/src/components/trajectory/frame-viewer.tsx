@@ -66,7 +66,7 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
 
   return (
     <div className="space-y-3">
-      <div className="aspect-video bg-muted rounded-lg overflow-hidden flex items-center justify-center border border-border">
+      <div className="aspect-video bg-card rounded-sm overflow-hidden flex items-center justify-center border border-border">
         {displayUrl ? (
           <img
             src={displayUrl}

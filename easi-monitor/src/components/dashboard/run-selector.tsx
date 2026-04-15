@@ -14,7 +14,7 @@ interface Props {
 export function RunSelector({ runs, selected, onSelect }: Props) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-medium text-muted-foreground">Run</label>
+      <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-sans mb-1.5">Run</label>
       <Select value={selected} onValueChange={(value) => { if (value) onSelect(value); }}>
         <SelectTrigger className="w-full sm:w-[400px]">
           <SelectValue placeholder="Select run" />

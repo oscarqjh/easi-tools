@@ -34,16 +34,16 @@ export function EpisodeHeader({ task, run, ep }: Props) {
   const success = (result.task_success ?? 0) as number;
 
   return (
-    <div className="border rounded-lg p-5 space-y-4">
+    <div className="border rounded-sm p-5 space-y-4">
       <div className="flex items-center gap-3">
-        <span className="font-mono text-sm font-bold text-muted-foreground">{ep}</span>
+        <span className="font-mono text-sm font-bold text-primary">{ep}</span>
         <Badge variant={success > 0 ? "default" : "destructive"}>
           {success > 0 ? "Success" : "Failed"}
         </Badge>
         {result.forced_early_stop && <Badge variant="secondary">Early Stop</Badge>}
       </div>
 
-      <p className="text-base leading-relaxed">{result.instruction}</p>
+      <p className="text-base leading-relaxed font-sans">{result.instruction}</p>
 
       <div className="flex flex-wrap gap-2 text-xs">
         {typeof result.num_steps === "number" && <Badge variant="outline">{Math.round(result.num_steps as number)} steps</Badge>}
@@ -58,7 +58,7 @@ export function EpisodeHeader({ task, run, ep }: Props) {
       </div>
 
       {config && (
-        <div className="text-xs text-muted-foreground border-t pt-3">
+        <div className="text-xs text-muted-foreground font-mono border-t border-border pt-3">
           Model: {config.cli_options.model} | Backend: {config.resolved_backend}
         </div>
       )}

@@ -20,9 +20,9 @@ function MetricsSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i} className="p-4">
-          <div className="h-3 w-20 bg-muted rounded animate-pulse mb-3" />
-          <div className="h-7 w-16 bg-muted rounded animate-pulse" />
+        <Card key={i} className="p-4 rounded-sm">
+          <div className="h-3 w-20 bg-card rounded-sm animate-pulse mb-3" />
+          <div className="h-7 w-16 bg-card rounded-sm animate-pulse" />
         </Card>
       ))}
     </div>
@@ -31,17 +31,17 @@ function MetricsSkeleton() {
 
 function EpisodesSkeleton() {
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <div className="bg-muted px-4 py-2.5">
-        <div className="h-3 w-full bg-muted-foreground/10 rounded animate-pulse" />
+    <div className="border rounded-sm overflow-hidden">
+      <div className="bg-[#1C1C28] px-4 py-2.5">
+        <div className="h-3 w-full bg-muted-foreground/10 rounded-sm animate-pulse" />
       </div>
       {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="flex gap-4 px-4 py-3 border-b">
-          <div className="h-5 w-16 bg-muted rounded animate-pulse" />
-          <div className="h-5 w-24 bg-muted rounded animate-pulse" />
-          <div className="h-5 flex-1 bg-muted rounded animate-pulse" />
-          <div className="h-5 w-12 bg-muted rounded animate-pulse" />
-          <div className="h-5 w-12 bg-muted rounded animate-pulse" />
+          <div className="h-5 w-16 bg-card rounded-sm animate-pulse" />
+          <div className="h-5 w-24 bg-card rounded-sm animate-pulse" />
+          <div className="h-5 flex-1 bg-card rounded-sm animate-pulse" />
+          <div className="h-5 w-12 bg-card rounded-sm animate-pulse" />
+          <div className="h-5 w-12 bg-card rounded-sm animate-pulse" />
         </div>
       ))}
     </div>
@@ -91,8 +91,8 @@ export default function Dashboard() {
       <div className="space-y-8">
         <div className="flex flex-col sm:flex-row gap-4 items-start">
           <div className="flex flex-col gap-1.5">
-            <div className="h-3 w-8 bg-muted rounded animate-pulse" />
-            <div className="h-8 w-[300px] bg-muted rounded-lg animate-pulse" />
+            <div className="h-3 w-8 bg-card rounded-sm animate-pulse" />
+            <div className="h-8 w-[300px] bg-card rounded-sm animate-pulse" />
           </div>
         </div>
         <MetricsSkeleton />
@@ -129,7 +129,7 @@ export default function Dashboard() {
       {selectedRun && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs uppercase tracking-widest font-mono text-muted-foreground">
               {episodesLoading ? "Loading episodes..." : `${filteredEpisodes.length} of ${episodes.length} episodes`}
             </div>
             <div className="flex gap-4 items-center">
@@ -144,7 +144,7 @@ export default function Dashboard() {
           {episodesLoading ? (
             <EpisodesSkeleton />
           ) : filteredEpisodes.length === 0 && episodes.length > 0 ? (
-            <div className="text-center py-12 border rounded-lg">
+            <div className="text-center py-12 border rounded-sm">
               <Inbox className="size-8 text-muted-foreground/50 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">No episodes match the current filters.</p>
             </div>

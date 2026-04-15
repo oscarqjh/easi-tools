@@ -30,20 +30,20 @@ export function PlaybackControls({
         className="w-full"
       />
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 border rounded-lg p-1">
-          <Button size="icon-sm" variant="ghost" onClick={() => onStepChange(0)}>
+        <div className="flex items-center gap-1 border rounded-sm p-1">
+          <Button size="icon-sm" variant="ghost" className="rounded-sm" onClick={() => onStepChange(0)}>
             <SkipBack className="size-3.5" />
           </Button>
-          <Button size="icon-sm" variant="ghost" onClick={() => onStepChange(Math.max(0, currentStep - 1))}>
+          <Button size="icon-sm" variant="ghost" className="rounded-sm" onClick={() => onStepChange(Math.max(0, currentStep - 1))}>
             <ChevronLeft className="size-4" />
           </Button>
-          <Button size="icon-sm" variant="default" onClick={onPlayPause}>
+          <Button size="icon-sm" variant="default" className="rounded-sm" onClick={onPlayPause}>
             {playing ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
           </Button>
-          <Button size="icon-sm" variant="ghost" onClick={() => onStepChange(Math.min(maxStep, currentStep + 1))}>
+          <Button size="icon-sm" variant="ghost" className="rounded-sm" onClick={() => onStepChange(Math.min(maxStep, currentStep + 1))}>
             <ChevronRight className="size-4" />
           </Button>
-          <Button size="icon-sm" variant="ghost" onClick={() => onStepChange(maxStep)}>
+          <Button size="icon-sm" variant="ghost" className="rounded-sm" onClick={() => onStepChange(maxStep)}>
             <SkipForward className="size-3.5" />
           </Button>
         </div>
@@ -51,7 +51,7 @@ export function PlaybackControls({
           <span className="text-sm font-mono text-muted-foreground">{currentStep} / {maxStep}</span>
           <div className="flex gap-1">
             {[1, 2, 5, 10].map((s) => (
-              <Button key={s} size="sm" variant={speed === s ? "secondary" : "ghost"} onClick={() => onSpeedChange(s)}>
+              <Button key={s} size="sm" variant={speed === s ? "secondary" : "ghost"} className="rounded-sm" onClick={() => onSpeedChange(s)}>
                 {s}x
               </Button>
             ))}

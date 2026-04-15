@@ -38,7 +38,7 @@ export function TimelineMarkers({ trajectory, onStepClick }: Props) {
 
   if (markers.length === 0) return null;
 
-  const colors = { fallback: "bg-red-400", subtask: "bg-green-400", done: "bg-blue-400" };
+  const colors = { fallback: "bg-[#F87171]", subtask: "bg-[#34D399]", done: "bg-[#60A5FA]" };
 
   return (
     <TooltipProvider>
@@ -56,9 +56,9 @@ export function TimelineMarkers({ trajectory, onStepClick }: Props) {
           ))}
         </div>
         <div className="flex gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-red-400 inline-block" /> Fallback</span>
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-green-400 inline-block" /> Subtask</span>
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-blue-400 inline-block" /> End</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#F87171] inline-block" /> Fallback</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#34D399] inline-block" /> Subtask</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#60A5FA] inline-block" /> End</span>
         </div>
       </div>
     </TooltipProvider>

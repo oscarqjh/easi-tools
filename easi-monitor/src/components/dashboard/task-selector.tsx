@@ -14,7 +14,7 @@ interface Props {
 export function TaskSelector({ tasks, selected, onSelect }: Props) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-medium text-muted-foreground">Task</label>
+      <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-sans mb-1.5">Task</label>
       <Select value={selected} onValueChange={(value) => { if (value) onSelect(value); }}>
         <SelectTrigger className="w-full sm:w-[300px]">
           <SelectValue placeholder="Select task" />
