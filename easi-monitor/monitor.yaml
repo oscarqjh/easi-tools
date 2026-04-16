@@ -5,5 +5,7 @@ sources:
   - name: "Local Logs"
     path: /mnt/umm/users/qianjianheng/workspace/eval_results_easi
 
-maps_dir: /mnt/aigc/users/qianjianheng/.cache/easi/datasets/oscarqjh_LHPR-VLN_easi/maps
-datasets_dir: /mnt/aigc/users/qianjianheng/.cache/easi/datasets
+# These should match easi's default datasets dir (./datasets from the EASI project root).
+# After running "easi task download", maps.zip is auto-extracted here.
+maps_dir: /mnt/umm/users/qianjianheng/workspace/EASI/datasets/oscarqjh_LHPR-VLN_easi/maps
+datasets_dir: /mnt/umm/users/qianjianheng/workspace/EASI/datasets
