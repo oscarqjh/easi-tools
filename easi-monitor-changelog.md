@@ -1,5 +1,30 @@
 # easi-monitor Changelog
 
+## [0.3.0] - 2026-04-16
+
+### Added
+- `monitor.yaml` config file for defining named source directories
+- Multi-source discovery: tasks from different sources shown separately with source labels
+- Source badges on task cards and source column in recent runs table (only when multiple sources configured)
+- `src/lib/config.ts`: hot-reloading config loader (re-reads on every API request, no restart needed)
+- Source path parameter threaded through all API routes, hooks, pages, and frame cache
+- Overview-first homepage: aggregate stats, task cards, recent runs table (zero clicks to see data)
+- Task detail page (`/task/[name]`) with run list and comparison chart
+- Run detail page (`/task/[name]/[run]`) with metrics and episode list
+- Overview API (`/api/overview`) aggregating across all sources
+- Full model path display (not just checkpoint name)
+- Clickable entire row in recent runs table
+- EASI-specific config.json validation (`run_id` + `cli_options`) for discovery
+
+### Changed
+- Replaced `EASI_LOGS_DIR` env var with `monitor.yaml` as primary config (env var still works as fallback)
+- All API routes now accept `source` query parameter for multi-source support
+- All hooks accept `sourcePath` parameter
+- Frame cache keys include source path to avoid cross-source collisions
+- Breadcrumb navigation links include source in URL params
+
+---
+
 ## [0.2.0] - 2026-04-16
 
 ### Added

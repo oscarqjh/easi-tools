@@ -40,13 +40,16 @@
 - [x] Metric cards with colored left accent borders
 - [x] Empty state with icon when filters return 0 results
 
-## Phase 2: Overview-First Homepage (Current)
-- [ ] Overview homepage: aggregate stats, task cards, recent runs table (zero clicks to see data)
-- [ ] New page: /task/[name] — task detail with run list + comparison chart
-- [ ] New page: /task/[name]/[run] — run detail with metrics + episode list
-- [ ] New API: /api/overview — aggregate stats across all tasks
-- [ ] Breadcrumb-based navigation replacing dropdown selectors
-- [ ] Deep-linkable URLs for every view
+## Phase 2: Overview-First Homepage (Complete)
+- [x] Overview homepage: aggregate stats, task cards, recent runs table (zero clicks to see data)
+- [x] New page: /task/[name] — task detail with run list + comparison chart
+- [x] New page: /task/[name]/[run] — run detail with metrics + episode list
+- [x] New API: /api/overview — aggregate stats across all tasks
+- [x] Breadcrumb-based navigation replacing dropdown selectors
+- [x] Deep-linkable URLs for every view
+- [x] Full model path display (not just checkpoint name)
+- [x] Clickable entire row in recent runs table
+- [x] EASI-specific config.json validation for task/run discovery
 
 ## Phase 3: Comparison and Analytics
 - [ ] Side-by-side episode comparison (two trajectory viewers)
@@ -54,12 +57,17 @@
 - [ ] Aggregate analytics dashboard (token usage trends, timing breakdowns)
 - [ ] Run diff view (compare metrics between two runs)
 
-## Phase 4: Multi-Source and Configuration
-- [ ] Multiple results directories (comma-separated EASI_LOGS_DIR or monitor.yaml config)
-- [ ] Merged task discovery across multiple directories
-- [ ] Export features (episode report, metrics CSV)
-- [ ] Thumbnail generation and caching
-- [ ] URL sharing (deep links to specific episodes/steps)
+## Phase 4: Multi-Source and Configuration (Complete)
+- [x] monitor.yaml config file with named sources
+- [x] Hot-reload config on every request (no server restart)
+- [x] Multi-source task discovery (separate tasks per source)
+- [x] Source labels in UI (badge on task cards, column in recent runs)
+- [x] Source path threaded through all API routes, hooks, and pages
+- [x] Backwards compatible with EASI_LOGS_DIR env var fallback
+- [x] EASI-specific config.json validation for discovery
+- [ ] Settings page (/settings) for managing sources from UI (deferred)
+- [ ] Export: benchmark TSV download (deferred)
+- [ ] Thumbnail generation and caching (deferred)
 
 ## Phase 5: Task Execution
 - [ ] Manual task start from UI (POST /api/task/start → spawns easi start subprocess)
