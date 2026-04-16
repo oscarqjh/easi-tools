@@ -1,5 +1,17 @@
 # easi-monitor Changelog
 
+## [0.5.1] - 2026-04-16
+
+### Added
+- Configurable FPS selector (3/5/10) on episode export button
+- SSE-based export progress indicator showing live frame count (e.g., "142/740")
+
+### Changed
+- Export API supports `stream=true` mode for real-time progress via Server-Sent Events
+- Two-step download flow: SSE stream for progress → POST to fetch completed file
+
+---
+
 ## [0.5.0] - 2026-04-16
 
 ### Added
