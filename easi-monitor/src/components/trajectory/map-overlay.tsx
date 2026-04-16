@@ -297,24 +297,20 @@ export function MapOverlay({ sceneId, trajectory, currentStep, onStepClick }: Pr
   }
 
   return (
-    <div className="border border-border rounded-sm bg-card overflow-hidden">
-      <div className="px-3 py-2 border-b border-border flex items-center justify-between">
-        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Map
-        </span>
-        {meta.floor_heights && meta.floor_heights.num_floors > 1 && (
-          <span className="text-[10px] font-mono text-muted-foreground">
-            Floor {currentFloor} / {meta.floor_heights.num_floors}
-          </span>
-        )}
-      </div>
-      <div ref={containerRef} className="relative w-full" style={{ aspectRatio: meta.render_params ? `${meta.render_params.width} / ${meta.render_params.height}` : "1 / 1" }}>
+    <div className="border border-border rounded-sm bg-card overflow-hidden relative">
+      <div ref={containerRef} className="relative w-full aspect-square">
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full cursor-crosshair"
           onClick={handleCanvasClick}
         />
       </div>
+      {/* Floor indicator overlay */}
+      {meta.floor_heights && meta.floor_heights.num_floors > 1 && (
+        <div className="absolute top-2 left-2 bg-[#0A0A0F]/80 text-[10px] font-mono text-muted-foreground px-2 py-1 rounded-sm">
+          Floor {currentFloor} / {meta.floor_heights.num_floors}
+        </div>
+      )}
     </div>
   );
 }

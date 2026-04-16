@@ -7,6 +7,8 @@ import { Home, ChevronRight } from "lucide-react";
 import { useTrajectory, useEpisodeMeta } from "@/lib/hooks";
 import { FrameViewer } from "@/components/trajectory/frame-viewer";
 import { MapOverlay } from "@/components/trajectory/map-overlay";
+import { TimelineMarkers } from "@/components/trajectory/timeline-markers";
+import { PlaybackControls } from "@/components/trajectory/playback-controls";
 import { MetadataPanel } from "@/components/trajectory/metadata-panel";
 import { EpisodeHeader } from "@/components/trajectory/episode-header";
 import type { RunConfig } from "@/types/easi";
@@ -29,6 +31,7 @@ export default function EpisodePage() {
   const [camera, setCamera] = useState("front");
   const [config, setConfig] = useState<RunConfig | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(1);
   const [episodeInstruction, setEpisodeInstruction] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -116,31 +119,48 @@ export default function EpisodePage() {
 
       <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} />
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        <div className="md:col-span-3 space-y-4">
-          <FrameViewer
-            task={task} run={run} ep={ep}
-            trajectory={trajectory}
-            camera={camera}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Left column: frame + map side-by-side, shared controls below */}
+        <div className="lg:col-span-3 space-y-3">
+          {/* Frame and map row */}
+          <div className={`grid gap-3 ${sceneId ? "grid-cols-2" : "grid-cols-1"}`}>
+            <FrameViewer
+              task={task} run={run} ep={ep}
+              trajectory={trajectory}
+              camera={camera}
+              currentStep={currentStep}
+              onStepChange={handleStepChange}
+              playing={playing}
+              onPlayingChange={setPlaying}
+              sourcePath={sourcePath}
+              hideControls
+            />
+            {sceneId && (
+              <MapOverlay
+                sceneId={sceneId}
+                trajectory={trajectory}
+                currentStep={currentStep}
+                onStepClick={handleStepChange}
+              />
+            )}
+          </div>
+          {/* Shared controls below both */}
+          <TimelineMarkers trajectory={trajectory} onStepClick={handleStepChange} />
+          <PlaybackControls
             currentStep={currentStep}
-            onStepChange={handleStepChange}
+            maxStep={Math.max(0, trajectory.length - 1)}
             playing={playing}
-            onPlayingChange={setPlaying}
-            sourcePath={sourcePath}
+            speed={speed}
+            onStepChange={handleStepChange}
+            onPlayPause={() => setPlaying(!playing)}
+            onSpeedChange={setSpeed}
           />
-          <div className="text-[10px] text-muted-foreground/50 font-mono mt-2">
+          <div className="text-[10px] text-muted-foreground/50 font-mono">
             &larr; &rarr; step &middot; space play/pause
           </div>
-          {sceneId && (
-            <MapOverlay
-              sceneId={sceneId}
-              trajectory={trajectory}
-              currentStep={currentStep}
-              onStepClick={handleStepChange}
-            />
-          )}
         </div>
-        <div className="md:col-span-2">
+        {/* Right column: metadata */}
+        <div className="lg:col-span-2">
           <MetadataPanel
             step={currentData}
             totalSteps={trajectory.length}

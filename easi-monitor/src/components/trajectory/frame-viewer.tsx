@@ -18,9 +18,10 @@ interface Props {
   playing: boolean;
   onPlayingChange: (playing: boolean) => void;
   sourcePath?: string | null;
+  hideControls?: boolean;
 }
 
-export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, onStepChange, playing, onPlayingChange, sourcePath }: Props) {
+export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, onStepChange, playing, onPlayingChange, sourcePath, hideControls }: Props) {
   const [speed, setSpeed] = useState(1);
   const maxStep = Math.max(0, trajectory.length - 1);
   const currentStepRef = useRef(currentStep);
@@ -68,7 +69,8 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-video bg-card rounded-sm overflow-hidden flex items-center justify-center border border-border">
+      {/* Frame image only — no aspect-video, use aspect-square since frames are 512x512 */}
+      <div className="relative aspect-square bg-card rounded-sm overflow-hidden flex items-center justify-center border border-border">
         {displayUrl ? (
           <img
             src={displayUrl}
@@ -85,16 +87,21 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
           {currentStep} / {maxStep}
         </div>
       </div>
-      <TimelineMarkers trajectory={trajectory} onStepClick={onStepChange} />
-      <PlaybackControls
-        currentStep={currentStep}
-        maxStep={maxStep}
-        playing={playing}
-        speed={speed}
-        onStepChange={onStepChange}
-        onPlayPause={() => onPlayingChange(!playing)}
-        onSpeedChange={setSpeed}
-      />
+      {/* Controls rendered separately when in side-by-side mode */}
+      {!hideControls && (
+        <>
+          <TimelineMarkers trajectory={trajectory} onStepClick={onStepChange} />
+          <PlaybackControls
+            currentStep={currentStep}
+            maxStep={maxStep}
+            playing={playing}
+            speed={speed}
+            onStepChange={onStepChange}
+            onPlayPause={() => onPlayingChange(!playing)}
+            onSpeedChange={setSpeed}
+          />
+        </>
+      )}
     </div>
   );
 }

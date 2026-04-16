@@ -54,10 +54,11 @@
 ## Phase 3: Top-Down Map Trajectory Overlay
 Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-time in easi-monitor.
 
-### Prerequisites (one-time offline, requires habitat-sim + GPU)
-- [ ] Generate top-down maps for all LHPR-VLN scenes using `dfs_vln_traj_gen/topdown_map_rendering.py --adaptive`
-- [ ] Store maps in a convention: `maps/{scene_id}/topdown_rgb_floor_{N}.png` + `render_params.json` + `floor_heights.json`
-- [ ] Configure map directory in `monitor.yaml` (e.g., `maps_dir: /path/to/maps`)
+### Prerequisites
+- [x] Top-down maps already generated for all 153 scenes at `dfs_vln_traj_gen/outputs/scene_outputs/`
+- [ ] Configure `maps_dir` in `monitor.yaml` pointing to existing scene_outputs
+- [ ] Upload maps to HuggingFace `oscarqjh/LHPR-VLN_easi` repo under `maps/` directory
+- [ ] Update easi dataset download to pull maps alongside episode data
 
 ### Implementation (easi-monitor, zero habitat-sim dependency)
 - [ ] API route: `GET /api/map?scene=SCENE_ID&floor=N` serves static top-down PNG
