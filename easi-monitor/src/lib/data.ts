@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { TTLCache } from "./cache";
 import type {
   RunConfig, RunSummary, EpisodeResult, TrajectoryStep,
   TaskInfo, RunInfo, EpisodeInfo,
@@ -10,6 +11,10 @@ type TaskInfoBase = Omit<TaskInfo, "source" | "sourcePath">;
 
 /** Internal run info without source metadata (added by API routes). */
 type RunInfoBase = Omit<RunInfo, "source" | "sourcePath">;
+
+const tasksCache = new TTLCache<TaskInfoBase[]>();
+const runsCache = new TTLCache<RunInfoBase[]>();
+const episodesCache = new TTLCache<EpisodeInfo[]>();
 
 /** Check if a config.json is from EASI (has run_id and cli_options). */
 function isEasiConfig(configPath: string): boolean {
@@ -22,6 +27,10 @@ function isEasiConfig(configPath: string): boolean {
 }
 
 export function discoverTasks(logsDir: string): TaskInfoBase[] {
+  const cacheKey = `tasks:${logsDir}`;
+  const cached = tasksCache.get(cacheKey);
+  if (cached) return cached;
+
   if (!fs.existsSync(logsDir)) return [];
   const entries = fs.readdirSync(logsDir, { withFileTypes: true });
   const tasks: TaskInfoBase[] = [];
@@ -34,10 +43,16 @@ export function discoverTasks(logsDir: string): TaskInfoBase[] {
     ).length;
     if (runCount > 0) tasks.push({ name: entry.name, runCount });
   }
-  return tasks.sort((a, b) => a.name.localeCompare(b.name));
+  const result = tasks.sort((a, b) => a.name.localeCompare(b.name));
+  tasksCache.set(cacheKey, result, 10_000);
+  return result;
 }
 
 export function discoverRuns(logsDir: string, taskName: string): RunInfoBase[] {
+  const cacheKey = `runs:${logsDir}:${taskName}`;
+  const cached = runsCache.get(cacheKey);
+  if (cached) return cached;
+
   const taskDir = path.join(logsDir, taskName);
   if (!fs.existsSync(taskDir)) return [];
   const entries = fs.readdirSync(taskDir, { withFileTypes: true });
@@ -67,10 +82,16 @@ export function discoverRuns(logsDir: string, taskName: string): RunInfoBase[] {
 
     runs.push({ runId: entry.name, model, date, hasSummary, summary, config });
   }
-  return runs.sort((a, b) => b.date.localeCompare(a.date));
+  const result = runs.sort((a, b) => b.date.localeCompare(a.date));
+  runsCache.set(cacheKey, result, 10_000);
+  return result;
 }
 
 export function discoverEpisodes(logsDir: string, taskName: string, runId: string): EpisodeInfo[] {
+  const cacheKey = `episodes:${logsDir}:${taskName}:${runId}`;
+  const cached = episodesCache.get(cacheKey);
+  if (cached) return cached;
+
   const epDir = path.join(logsDir, taskName, runId, "episodes");
   if (!fs.existsSync(epDir)) return [];
   const entries = fs.readdirSync(epDir, { withFileTypes: true });
@@ -104,7 +125,9 @@ export function discoverEpisodes(logsDir: string, taskName: string, runId: strin
     });
   }
 
-  return episodes.sort((a, b) => a.episodeDir.localeCompare(b.episodeDir));
+  const result = episodes.sort((a, b) => a.episodeDir.localeCompare(b.episodeDir));
+  episodesCache.set(cacheKey, result, 30_000);
+  return result;
 }
 
 export function readTrajectory(logsDir: string, taskName: string, runId: string, episodeDir: string): TrajectoryStep[] {

@@ -25,8 +25,8 @@ export default function EpisodePage() {
   const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
   const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
 
-  const { trajectory, loading } = useTrajectory(task, run, ep, sourcePath);
-  const episodeMeta = useEpisodeMeta(task, run, ep, sourcePath);
+  const { trajectory, loading, error: trajectoryError } = useTrajectory(task, run, ep, sourcePath);
+  const { meta: episodeMeta } = useEpisodeMeta(task, run, ep, sourcePath);
   const sceneId = episodeMeta?.scene ? String(episodeMeta.scene) : null;
   const [currentStep, setCurrentStep] = useState(0);
   const [camera, setCamera] = useState("front");
@@ -102,6 +102,14 @@ export default function EpisodePage() {
             <div className="h-96 bg-card rounded-sm animate-pulse" />
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (trajectoryError) {
+    return (
+      <div className="text-center py-20">
+        <div className="text-destructive text-sm font-mono">Failed to load trajectory: {trajectoryError}</div>
       </div>
     );
   }

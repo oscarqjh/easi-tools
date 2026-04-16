@@ -56,10 +56,18 @@ function OverviewSkeleton() {
 }
 
 export default function Dashboard() {
-  const { data, loading } = useOverview();
+  const { data, loading, error } = useOverview();
   const router = useRouter();
 
   if (loading) return <OverviewSkeleton />;
+
+  if (data === null && !loading) {
+    return (
+      <div className="text-center py-20">
+        <div className="text-destructive text-sm font-mono">Failed to load overview data{error ? `: ${error}` : ""}</div>
+      </div>
+    );
+  }
 
   if (!data || data.totalTasks === 0) {
     return (

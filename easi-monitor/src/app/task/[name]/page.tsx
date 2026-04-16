@@ -34,7 +34,7 @@ export default function TaskDetailPage() {
   const searchParams = useSearchParams();
   const taskName = decodeURIComponent(params.name);
   const sourcePath = searchParams.get("source");
-  const { runs, loading } = useRuns(taskName, sourcePath);
+  const { runs, loading, error } = useRuns(taskName, sourcePath);
 
   const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
 
@@ -55,6 +55,10 @@ export default function TaskDetailPage() {
 
       {loading ? (
         <RunsSkeleton />
+      ) : error ? (
+        <div className="text-center py-20">
+          <div className="text-destructive text-sm font-mono">Failed to load runs: {error}</div>
+        </div>
       ) : (
         <>
           {/* Metrics chart */}

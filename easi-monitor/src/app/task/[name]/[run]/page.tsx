@@ -57,7 +57,7 @@ export default function RunDetailPage() {
   const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
   const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
 
-  const { episodes, loading: episodesLoading } = useEpisodes(taskName, runId, sourcePath);
+  const { episodes, loading: episodesLoading, error: episodesError } = useEpisodes(taskName, runId, sourcePath);
 
   const [summary, setSummary] = useState<RunSummary | null>(null);
   const [config, setConfig] = useState<RunConfig | null>(null);
@@ -141,6 +141,10 @@ export default function RunDetailPage() {
         </div>
         {episodesLoading ? (
           <EpisodesSkeleton />
+        ) : episodesError ? (
+          <div className="text-center py-12 border rounded-sm">
+            <div className="text-destructive text-sm font-mono">Failed to load episodes: {episodesError}</div>
+          </div>
         ) : filteredEpisodes.length === 0 && episodes.length > 0 ? (
           <div className="text-center py-12 border rounded-sm">
             <Inbox className="size-8 text-muted-foreground/50 mx-auto mb-3" />
