@@ -110,7 +110,7 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
                   LLM Response
                 </AccordionTrigger>
                 <AccordionContent>
-                  <pre className="text-xs font-mono bg-card p-3 rounded-sm whitespace-pre-wrap break-all max-h-[300px] overflow-auto">
+                  <pre className="text-xs font-mono bg-card p-3 rounded-sm whitespace-pre-wrap break-all max-h-[300px] overflow-auto" style={{ fontVariantLigatures: "none" }}>
                     {step.llm_response}
                   </pre>
                 </AccordionContent>
@@ -129,7 +129,7 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
                     {prompt.map((msg, i) => (
                       <div key={i}>
                         <div className="text-xs font-semibold text-muted-foreground mb-1">[{msg.role}]</div>
-                        <pre className="text-xs font-mono bg-card p-3 rounded-sm whitespace-pre-wrap break-all max-h-[300px] overflow-auto">
+                        <pre className="text-xs font-mono bg-card p-3 rounded-sm whitespace-pre-wrap break-all max-h-[300px] overflow-auto" style={{ fontVariantLigatures: "none" }}>
                           {msg.content}
                         </pre>
                       </div>
