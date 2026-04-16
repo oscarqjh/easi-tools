@@ -53,9 +53,7 @@ export function discoverRuns(logsDir: string, taskName: string): RunInfo[] {
       ? `${dateMatch[1].slice(0, 4)}-${dateMatch[1].slice(4, 6)}-${dateMatch[1].slice(6, 8)} ${dateMatch[2].slice(0, 2)}:${dateMatch[2].slice(2, 4)}`
       : entry.name;
 
-    const model = config?.cli_options?.model
-      ? path.basename(config.cli_options.model)
-      : entry.name;
+    const model = config?.cli_options?.model ?? entry.name;
 
     runs.push({ runId: entry.name, model, date, hasSummary, summary, config });
   }
