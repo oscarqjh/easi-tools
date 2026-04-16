@@ -34,7 +34,8 @@ export function EpisodeHeader({ task, run, ep }: Props) {
   const success = (result.task_success ?? 0) as number;
 
   return (
-    <div className="border rounded-sm p-5 space-y-4">
+    <div className="border rounded-sm p-4 space-y-3">
+      <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Episode</div>
       <div className="flex items-center gap-3">
         <span className="font-mono text-sm font-bold text-primary">{ep}</span>
         <Badge variant={success > 0 ? "default" : "destructive"}>

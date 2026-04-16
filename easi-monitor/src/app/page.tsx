@@ -114,25 +114,44 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row gap-4 items-start">
-        <TaskSelector tasks={tasks} selected={selectedTask} onSelect={handleTaskChange} />
-        {selectedTask && (
-          <RunSelector runs={runs} selected={selectedRun} onSelect={setSelectedRun} />
-        )}
+      <div>
+        <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-3">Select Evaluation</div>
+        <div className="flex flex-col sm:flex-row gap-4 items-start">
+          <TaskSelector tasks={tasks} selected={selectedTask} onSelect={handleTaskChange} />
+          {selectedTask && (
+            <RunSelector runs={runs} selected={selectedRun} onSelect={setSelectedRun} />
+          )}
+        </div>
       </div>
 
-      {selectedRun && !currentRun && <MetricsSkeleton />}
-      {currentRun && <MetricsPanel summary={currentRun.summary} />}
+      {selectedTask && !selectedRun && (
+        <div className="border border-border rounded-sm p-8 text-center">
+          <div className="text-muted-foreground text-sm font-sans">
+            Select a run to view metrics and episodes
+          </div>
+          <div className="text-muted-foreground/50 text-xs mt-2 font-mono">
+            {runs.length} run(s) available
+          </div>
+        </div>
+      )}
 
-      {selectedTask && runs.length > 1 && <MetricsChart runs={runs} />}
+      {selectedRun && !currentRun && <MetricsSkeleton />}
+
+      {currentRun && (
+        <div className="border border-border rounded-sm p-4 space-y-4">
+          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Run Summary</div>
+          <MetricsPanel summary={currentRun.summary} />
+          {runs.length > 1 && <MetricsChart runs={runs} />}
+        </div>
+      )}
 
       {selectedRun && (
-        <div className="space-y-4">
+        <div className="border border-border rounded-sm p-4 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="text-xs uppercase tracking-widest font-mono text-muted-foreground">
-              {episodesLoading ? "Loading episodes..." : `${filteredEpisodes.length} of ${episodes.length} episodes`}
+            <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">
+              {episodesLoading ? "Loading episodes..." : <>Episodes &middot; {filteredEpisodes.length} of {episodes.length}</>}
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex gap-3 items-center">
               <EpisodeFilters
                 status={statusFilter} onStatusChange={setStatusFilter}
                 sortField={sortField} onSortFieldChange={setSortField}
