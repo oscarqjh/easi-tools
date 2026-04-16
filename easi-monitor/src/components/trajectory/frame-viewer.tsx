@@ -19,10 +19,10 @@ interface Props {
   onPlayingChange: (playing: boolean) => void;
   sourcePath?: string | null;
   hideControls?: boolean;
+  speed?: number;
 }
 
-export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, onStepChange, playing, onPlayingChange, sourcePath, hideControls }: Props) {
-  const [speed, setSpeed] = useState(1);
+export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, onStepChange, playing, onPlayingChange, sourcePath, hideControls, speed = 1 }: Props) {
   const maxStep = Math.max(0, trajectory.length - 1);
   const currentStepRef = useRef(currentStep);
   currentStepRef.current = currentStep;
@@ -48,10 +48,10 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
     }
   }, [task, run, ep, currentStep, camera, sourcePath]);
 
-  // Debounced prefetch — only fires 150ms after last step change
+  // Debounced prefetch — biases forward during playback, scales with speed
   useEffect(() => {
-    frameCache.schedulePrefetch(task, run, ep, currentStep, maxStep, camera, 15, sourcePath);
-  }, [task, run, ep, currentStep, maxStep, camera, sourcePath]);
+    frameCache.schedulePrefetch(task, run, ep, currentStep, maxStep, camera, 15, sourcePath, playing, speed);
+  }, [task, run, ep, currentStep, maxStep, camera, sourcePath, playing, speed]);
 
   // Single playback interval
   useEffect(() => {
@@ -98,7 +98,7 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
             speed={speed}
             onStepChange={onStepChange}
             onPlayPause={() => onPlayingChange(!playing)}
-            onSpeedChange={setSpeed}
+            onSpeedChange={() => {}}
           />
         </>
       )}

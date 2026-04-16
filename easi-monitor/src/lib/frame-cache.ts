@@ -1,6 +1,6 @@
 "use client";
 
-const MAX_CACHE_SIZE = 100;
+const MAX_CACHE_SIZE = 200;
 
 /**
  * Blob-based frame cache. Fetches images as blobs and creates object URLs
@@ -75,39 +75,61 @@ class FrameCache {
   }
 
   /**
-   * Debounced prefetch: cancels stale prefetches, waits 150ms after last call,
-   * then fetches frames around the current step.
+   * Debounced prefetch: cancels stale prefetches, then fetches frames
+   * around the current step. When playing, biases heavily forward and
+   * scales range with speed.
    */
   schedulePrefetch(
     task: string, run: string, ep: string,
     currentStep: number, maxStep: number, camera: string,
     range: number = 15, source?: string | null,
+    playing: boolean = false, speed: number = 1,
   ): void {
     // Cancel any pending prefetch scheduling
     if (this.prefetchTimer) {
       clearTimeout(this.prefetchTimer);
     }
 
+    // Shorter debounce when playing (need frames faster)
+    const debounceMs = playing ? 30 : 150;
+
     this.prefetchTimer = setTimeout(() => {
+      // Scale range with speed when playing
+      const effectiveRange = playing ? Math.max(range, speed * 15) : range;
+
       // Cancel all in-flight prefetches that are far from current position
       for (const [key, controller] of this.loading) {
         const stepMatch = key.match(/\/(\d+)\//);
         if (stepMatch) {
           const loadingStep = parseInt(stepMatch[1], 10);
-          if (Math.abs(loadingStep - currentStep) > range) {
+          if (Math.abs(loadingStep - currentStep) > effectiveRange) {
             controller.abort();
             this.loading.delete(key);
           }
         }
       }
 
-      // Prefetch in priority order: current first, then outward
-      const start = Math.max(0, currentStep - range);
-      const end = Math.min(maxStep, currentStep + range);
+      // Build prefetch list: when playing, bias forward (90% ahead, 10% behind)
       const steps: number[] = [currentStep];
-      for (let offset = 1; offset <= range; offset++) {
-        if (currentStep + offset <= end) steps.push(currentStep + offset);
-        if (currentStep - offset >= start) steps.push(currentStep - offset);
+      if (playing) {
+        const forwardRange = Math.min(maxStep - currentStep, Math.ceil(effectiveRange * 0.9));
+        const backRange = Math.min(currentStep, Math.ceil(effectiveRange * 0.1));
+        // Forward frames first (most important during playback)
+        for (let i = 1; i <= forwardRange; i++) {
+          steps.push(currentStep + i);
+        }
+        // A few behind for backward stepping
+        for (let i = 1; i <= backRange; i++) {
+          steps.push(currentStep - i);
+        }
+      } else {
+        // Symmetric when paused
+        const start = Math.max(0, currentStep - effectiveRange);
+        const end = Math.min(maxStep, currentStep + effectiveRange);
+        for (let offset = 1; offset <= effectiveRange; offset++) {
+          if (currentStep + offset <= end) steps.push(currentStep + offset);
+          if (currentStep - offset >= start) steps.push(currentStep - offset);
+        }
       }
 
       for (const s of steps) {

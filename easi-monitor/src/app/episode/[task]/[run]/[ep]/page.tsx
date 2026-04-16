@@ -134,6 +134,7 @@ export default function EpisodePage() {
               onPlayingChange={setPlaying}
               sourcePath={sourcePath}
               hideControls
+              speed={speed}
             />
             {sceneId && (
               <MapOverlay
