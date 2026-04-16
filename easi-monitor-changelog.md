@@ -1,5 +1,36 @@
 # easi-monitor Changelog
 
+## [0.4.0] - 2026-04-16
+
+### Added
+- Top-down map trajectory overlay: canvas-based map rendering synced with frame viewer
+- Map API routes: `/api/map` (serves map PNGs + metadata) and `/api/episode-meta` (scene ID lookup from dataset)
+- Side-by-side layout: frame and map displayed as equal-width squares with shared controls below
+- `maps_dir` and `datasets_dir` config fields in `monitor.yaml`
+- Coordinate transform (world → pixel) using render_params.json + floor_heights.json
+- Floor auto-selection based on agent Y position
+- Click-on-map to jump to nearest trajectory step
+- Trajectory rendering: past path (solid cyan), future path (dotted), current position (pulsing dot), start (green), end (red)
+- `start.sh` startup script for shared storage deployment (uses shared Node.js binary)
+- `formatRunLabel()` utility: breadcrumbs show "YYYY-MM-DD HH:MM · last/3/model/segments"
+- Speed-adaptive prefetch: scales range with playback speed, biases forward during playback
+- `useEpisodeMeta` hook for fetching episode metadata (scene, instruction, etc.)
+
+### Changed
+- Frame viewer uses `aspect-square` instead of `aspect-video` (matches 512x512 frame images)
+- Prefetch debounce reduced to 30ms during playback (was 150ms always)
+- Prefetch range scales to `speed × 15` during playback (was fixed ±15)
+- Prefetch bias: 90% forward / 10% back during playback (was symmetric)
+- Frame cache increased to 200 entries (was 100)
+- Prompt reconstruction uses episode instruction from result.json instead of task config description
+- Episode list rows are fully clickable (was link on episode ID only)
+
+### Fixed
+- Font ligatures disabled in code blocks (`fontVariantLigatures: none`) — `<|forward|>` no longer renders as triangle arrows
+- Breadcrumbs show formatted run label instead of raw directory name or truncated checkpoint name
+
+---
+
 ## [0.3.0] - 2026-04-16
 
 ### Added

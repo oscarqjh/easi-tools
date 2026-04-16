@@ -51,34 +51,27 @@
 - [x] Clickable entire row in recent runs table
 - [x] EASI-specific config.json validation for task/run discovery
 
-## Phase 3: Top-Down Map Trajectory Overlay
+## Phase 3: Top-Down Map Trajectory Overlay (Complete)
 Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-time in easi-monitor.
 
 ### Prerequisites
 - [x] Top-down maps already generated for all 153 scenes at `dfs_vln_traj_gen/outputs/scene_outputs/`
-- [ ] Configure `maps_dir` in `monitor.yaml` pointing to existing scene_outputs
+- [x] Configure `maps_dir` in `monitor.yaml` pointing to existing scene_outputs
 - [ ] Upload maps to HuggingFace `oscarqjh/LHPR-VLN_easi` repo under `maps/` directory
 - [ ] Update easi dataset download to pull maps alongside episode data
 
 ### Implementation (easi-monitor, zero habitat-sim dependency)
-- [ ] API route: `GET /api/map?scene=SCENE_ID&floor=N` serves static top-down PNG
-- [ ] API route: `GET /api/map/params?scene=SCENE_ID` returns render_params.json + floor_heights.json
-- [ ] Extract scene ID from episode config (task_config.simulator_configs or episode metadata)
-- [ ] Map overlay component: `<canvas>` rendering trajectory on map image
-- [ ] Coordinate transform (TypeScript, pure math, no dependencies):
-  ```
-  ORTHO_SCALE_FACTOR = 1.632
-  meters_per_pixel = ortho_scale / ORTHO_SCALE_FACTOR  (≈ 0.01225 m/px)
-  pixel_x = (agent_pose[0] - center_x) / mpp + width / 2
-  pixel_y = (agent_pose[2] - center_z) / mpp + height / 2
-  ```
-  agent_pose[0] (world X) → pixel X, agent_pose[2] (world Z) → pixel Y
-  agent_pose[1] (world Y) determines which floor's map PNG to show
-- [ ] Floor selection: compare agent_pose[1] against floor_heights to pick correct map
-- [ ] Trajectory rendering: past path as dimmed polyline, current position as pulsing dot, future path as dotted line
-- [ ] Direction indicator: arrow/triangle at current position based on agent rotation
-- [ ] Sync with frame scrubber: dot moves as user steps through trajectory
-- [ ] Add map panel to trajectory viewer page (alongside frame viewer + metadata panel)
+- [x] API route: `GET /api/map?scene=SCENE_ID&floor=N` serves static top-down PNG
+- [x] API route: `GET /api/map?scene=SCENE_ID&meta=true` returns render_params.json + floor_heights.json
+- [x] API route: `GET /api/episode-meta` extracts scene ID from dataset JSONL
+- [x] Map overlay component: `<canvas>` rendering trajectory on map image
+- [x] Coordinate transform (TypeScript, pure math, no dependencies)
+- [x] Floor selection: compare agent_pose[1] against floor_heights to pick correct map
+- [x] Trajectory rendering: past path (solid cyan), current position (pulsing dot), future path (dotted)
+- [x] Sync with frame scrubber: dot moves as user steps through trajectory
+- [x] Side-by-side layout: frame and map equal-width squares, shared controls below
+- [x] Click-on-map to jump to nearest trajectory step
+- [ ] Direction indicator: arrow/triangle at current position based on agent rotation (needs bridge.py rotation data)
 
 ### Future enhancements
 - [ ] Add target_coord to bridge.py _build_step_info() (expose sim.info["target coord"] as [x,y,z] in trajectory info)
