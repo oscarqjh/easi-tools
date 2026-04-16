@@ -94,7 +94,7 @@ export default function Dashboard() {
     { label: "Total Runs", value: String(data.totalRuns), accent: "border-l-[#00D4AA]" },
     { label: "Tasks", value: String(data.totalTasks), accent: "border-l-[#60A5FA]" },
     { label: "Episodes", value: data.totalEpisodes.toLocaleString(), accent: "border-l-[#FBBF24]" },
-    { label: "Avg Success Rate", value: `${(data.avgSuccessRate * 100).toFixed(1)}%`, accent: "border-l-[#34D399]" },
+    { label: "Max Success Rate", value: `${(data.maxSuccessRate * 100).toFixed(1)}%`, accent: "border-l-[#34D399]" },
   ];
 
   const hasMultipleSources = new Set(data.tasks.map(t => t.source)).size > 1;

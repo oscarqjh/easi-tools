@@ -11,8 +11,7 @@ export async function GET() {
     const allRuns: RecentRun[] = [];
 
     let totalEpisodes = 0;
-    let srSum = 0;
-    let srCount = 0;
+    let srMax = 0;
     let totalRunCount = 0;
 
     for (const source of config.sources) {
@@ -62,9 +61,8 @@ export async function GET() {
           if (numEpisodes !== null) {
             totalEpisodes += numEpisodes;
           }
-          if (sr !== null) {
-            srSum += sr;
-            srCount += 1;
+          if (sr !== null && sr > srMax) {
+            srMax = sr;
           }
 
           allRuns.push({
@@ -90,7 +88,7 @@ export async function GET() {
       totalRuns: totalRunCount,
       totalTasks: tasks.length,
       totalEpisodes,
-      avgSuccessRate: srCount > 0 ? srSum / srCount : 0,
+      maxSuccessRate: srMax,
       tasks,
       recentRuns,
     };

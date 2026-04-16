@@ -153,7 +153,7 @@ export interface OverviewData {
   totalRuns: number;
   totalTasks: number;
   totalEpisodes: number;
-  avgSuccessRate: number;
+  maxSuccessRate: number;
   tasks: OverviewTask[];
   recentRuns: RecentRun[];
 }
