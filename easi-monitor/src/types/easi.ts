@@ -1,3 +1,22 @@
+/** Map metadata types */
+export interface RenderParams {
+  width: number;
+  height: number;
+  ortho_scale: number;
+  center_x: number;
+  center_z: number;
+}
+
+export interface FloorHeights {
+  floor_heights: number[];
+  num_floors: number;
+}
+
+export interface MapMeta {
+  render_params: RenderParams;
+  floor_heights: FloorHeights;
+}
+
 /** config.json — run-level configuration */
 export interface RunConfig {
   run_id: string;

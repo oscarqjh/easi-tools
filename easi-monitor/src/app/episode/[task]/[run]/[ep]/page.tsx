@@ -4,8 +4,9 @@ import { useState, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Home, ChevronRight } from "lucide-react";
-import { useTrajectory } from "@/lib/hooks";
+import { useTrajectory, useEpisodeMeta } from "@/lib/hooks";
 import { FrameViewer } from "@/components/trajectory/frame-viewer";
+import { MapOverlay } from "@/components/trajectory/map-overlay";
 import { MetadataPanel } from "@/components/trajectory/metadata-panel";
 import { EpisodeHeader } from "@/components/trajectory/episode-header";
 import type { RunConfig } from "@/types/easi";
@@ -22,6 +23,8 @@ export default function EpisodePage() {
   const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
 
   const { trajectory, loading } = useTrajectory(task, run, ep, sourcePath);
+  const episodeMeta = useEpisodeMeta(task, run, ep, sourcePath);
+  const sceneId = episodeMeta?.scene ? String(episodeMeta.scene) : null;
   const [currentStep, setCurrentStep] = useState(0);
   const [camera, setCamera] = useState("front");
   const [config, setConfig] = useState<RunConfig | null>(null);
@@ -114,7 +117,7 @@ export default function EpisodePage() {
       <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} />
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        <div className="md:col-span-3">
+        <div className="md:col-span-3 space-y-4">
           <FrameViewer
             task={task} run={run} ep={ep}
             trajectory={trajectory}
@@ -128,6 +131,14 @@ export default function EpisodePage() {
           <div className="text-[10px] text-muted-foreground/50 font-mono mt-2">
             &larr; &rarr; step &middot; space play/pause
           </div>
+          {sceneId && (
+            <MapOverlay
+              sceneId={sceneId}
+              trajectory={trajectory}
+              currentStep={currentStep}
+              onStepClick={handleStepChange}
+            />
+          )}
         </div>
         <div className="md:col-span-2">
           <MetadataPanel

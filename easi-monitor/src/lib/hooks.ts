@@ -63,6 +63,23 @@ export function useEpisodes(task: string | null, run: string | null, sourcePath:
   return { episodes, loading };
 }
 
+export function useEpisodeMeta(task: string | null, run: string | null, ep: string | null, sourcePath: string | null) {
+  const [meta, setMeta] = useState<Record<string, unknown> | null>(null);
+  useEffect(() => {
+    if (!task || !run || !ep) return;
+    const params = new URLSearchParams({ task, run, ep });
+    if (sourcePath) params.set("source", sourcePath);
+    fetch(`/api/episode-meta?${params}`)
+      .then((r) => {
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then((data) => { if (data) setMeta(data); })
+      .catch(console.error);
+  }, [task, run, ep, sourcePath]);
+  return meta;
+}
+
 export function useTrajectory(task: string | null, run: string | null, ep: string | null, sourcePath: string | null) {
   const [trajectory, setTrajectory] = useState<TrajectoryStep[]>([]);
   const [loading, setLoading] = useState(false);

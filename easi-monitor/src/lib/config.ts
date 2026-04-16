@@ -9,6 +9,8 @@ export interface Source {
 
 export interface MonitorConfig {
   sources: Source[];
+  maps_dir: string | null;
+  datasets_dir: string | null;
 }
 
 const CONFIG_PATHS = [
@@ -30,7 +32,11 @@ export function loadConfig(): MonitorConfig {
               path: String(s.path ?? ""),
             }))
             .filter((s) => s.path !== "");
-          if (sources.length > 0) return { sources };
+          if (sources.length > 0) return {
+            sources,
+            maps_dir: typeof raw.maps_dir === "string" ? raw.maps_dir : null,
+            datasets_dir: typeof raw.datasets_dir === "string" ? raw.datasets_dir : null,
+          };
         }
       } catch { /* fall through */ }
     }
@@ -41,11 +47,15 @@ export function loadConfig(): MonitorConfig {
   if (envDir) {
     return {
       sources: [{ name: "Default", path: envDir }],
+      maps_dir: null,
+      datasets_dir: null,
     };
   }
 
   // Final fallback
   return {
     sources: [{ name: "Local", path: path.resolve(process.cwd(), "..", "logs") }],
+    maps_dir: null,
+    datasets_dir: null,
   };
 }
