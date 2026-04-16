@@ -1,5 +1,25 @@
 # easi-monitor Changelog
 
+## [0.5.0] - 2026-04-16
+
+### Added
+- Video export: compose episode visualization as MP4 (observation + map + metadata panels)
+- CLI: `python -m autoeval.export_video --run-dir ... --episode ... -o video.mp4`
+- UI: "Export Video" button on episode page with spinner and direct download
+- API route: `GET /api/export-video` triggers server-side rendering via Python (opencv + PIL)
+- Maps uploaded to HuggingFace `oscarqjh/LHPR-VLN_easi` as `maps.zip`
+- `maps.zip` added to EASI `_base.yaml` zip_files for auto-extraction on `easi task download`
+- Homepage shows max success rate instead of average
+
+### Changed
+- `monitor.yaml` maps_dir and datasets_dir point to easi cache default path (`~/.cache/easi/datasets/`)
+
+### Fixed
+- EASI CLI `--data-dir` help text corrected (default is `~/.cache/easi/datasets`, not `./datasets`)
+- LHPR-VLN bridge: stop feedback uses `sim.successes` flag instead of stale `geo_dis` after stage advance
+
+---
+
 ## [0.4.0] - 2026-04-16
 
 ### Added

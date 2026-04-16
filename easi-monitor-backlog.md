@@ -57,8 +57,8 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 ### Prerequisites
 - [x] Top-down maps already generated for all 153 scenes at `dfs_vln_traj_gen/outputs/scene_outputs/`
 - [x] Configure `maps_dir` in `monitor.yaml` pointing to existing scene_outputs
-- [ ] Upload maps to HuggingFace `oscarqjh/LHPR-VLN_easi` repo under `maps/` directory
-- [ ] Update easi dataset download to pull maps alongside episode data
+- [x] Upload maps to HuggingFace `oscarqjh/LHPR-VLN_easi` repo as `maps.zip`
+- [x] Update easi `_base.yaml` zip_files to auto-extract maps on download
 
 ### Implementation (easi-monitor, zero habitat-sim dependency)
 - [x] API route: `GET /api/map?scene=SCENE_ID&floor=N` serves static top-down PNG
@@ -104,6 +104,17 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [ ] Settings page (/settings) for managing sources from UI (deferred)
 - [ ] Export: benchmark TSV download (deferred)
 - [ ] Thumbnail generation and caching (deferred)
+
+## Phase 4.5: Video Export (Complete)
+- [x] Python export script (`autoeval/export_video.py`): composes observation + map + metadata as MP4
+- [x] CLI: `python -m autoeval.export_video --run-dir ... --episode ... -o video.mp4`
+- [x] API route: `GET /api/export-video` triggers server-side rendering
+- [x] UI: "Export Video" button on episode page with spinner and direct download
+- [x] Uses opencv + PIL (available in easi venv, no ffmpeg needed)
+- [x] Renders at 5 fps, 1324x512 (frame + map + metadata panels)
+- [ ] Configurable FPS from UI (currently hardcoded to 5)
+- [ ] Progress indicator during export (currently just spinner)
+- [ ] Batch export: export all episodes for a run
 
 ## Phase 5: Task Execution
 - [ ] Manual task start from UI (POST /api/task/start → spawns easi start subprocess)
