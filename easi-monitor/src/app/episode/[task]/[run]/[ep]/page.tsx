@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Home, ChevronRight } from "lucide-react";
+import { Home, ChevronRight, Download, Loader2 } from "lucide-react";
 import { useTrajectory, useEpisodeMeta } from "@/lib/hooks";
 import { FrameViewer } from "@/components/trajectory/frame-viewer";
 import { MapOverlay } from "@/components/trajectory/map-overlay";
@@ -34,6 +34,7 @@ export default function EpisodePage() {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [episodeInstruction, setEpisodeInstruction] = useState<string | undefined>(undefined);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
@@ -118,7 +119,40 @@ export default function EpisodePage() {
         <span className="font-mono text-foreground">{ep}</span>
       </div>
 
-      <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} />
+      <div className="flex items-center justify-between">
+        <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} />
+      </div>
+      <button
+        disabled={exporting}
+        onClick={async () => {
+          setExporting(true);
+          try {
+            const params = new URLSearchParams({ task, run, ep });
+            if (sourcePath) params.set("source", sourcePath);
+            const resp = await fetch(`/api/export-video?${params}`);
+            if (!resp.ok) {
+              const err = await resp.json();
+              alert(`Export failed: ${err.error}`);
+              return;
+            }
+            const blob = await resp.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${task}_${ep}.mp4`;
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch (e) {
+            alert(`Export error: ${e}`);
+          } finally {
+            setExporting(false);
+          }
+        }}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-muted-foreground"
+      >
+        {exporting ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
+        {exporting ? "Exporting..." : "Export Video"}
+      </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left column: frame + map side-by-side, shared controls below */}
