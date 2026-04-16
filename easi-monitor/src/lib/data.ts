@@ -11,6 +11,16 @@ export function getLogsDir(): string {
   return path.resolve(process.cwd(), "..", "logs");
 }
 
+/** Check if a config.json is from EASI (has run_id and cli_options). */
+function isEasiConfig(configPath: string): boolean {
+  try {
+    const raw = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    return typeof raw.run_id === "string" && raw.cli_options != null;
+  } catch {
+    return false;
+  }
+}
+
 export function discoverTasks(logsDir: string): TaskInfo[] {
   if (!fs.existsSync(logsDir)) return [];
   const entries = fs.readdirSync(logsDir, { withFileTypes: true });
@@ -20,7 +30,7 @@ export function discoverTasks(logsDir: string): TaskInfo[] {
     const taskPath = path.join(logsDir, entry.name);
     const runs = fs.readdirSync(taskPath, { withFileTypes: true });
     const runCount = runs.filter(
-      (r) => r.isDirectory() && fs.existsSync(path.join(taskPath, r.name, "config.json"))
+      (r) => r.isDirectory() && isEasiConfig(path.join(taskPath, r.name, "config.json"))
     ).length;
     if (runCount > 0) tasks.push({ name: entry.name, runCount });
   }
@@ -36,7 +46,7 @@ export function discoverRuns(logsDir: string, taskName: string): RunInfo[] {
     if (!entry.isDirectory()) continue;
     const runDir = path.join(taskDir, entry.name);
     const configPath = path.join(runDir, "config.json");
-    if (!fs.existsSync(configPath)) continue;
+    if (!isEasiConfig(configPath)) continue;
 
     let config: RunConfig | null = null;
     try { config = JSON.parse(fs.readFileSync(configPath, "utf-8")); } catch { /* skip */ }
