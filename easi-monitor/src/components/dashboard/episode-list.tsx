@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { EpisodeInfo } from "@/types/easi";
 import { getEpisodeStatus } from "@/lib/episode-utils";
 
@@ -27,6 +27,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
+  const router = useRouter();
   const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
 
   return (
@@ -57,17 +58,11 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
               return (
                 <tr
                   key={ep.episodeDir}
-                  className={`border-b border-border hover:bg-[#252535] transition-colors ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
+                  className={`border-b border-border hover:bg-[#252535] transition-colors cursor-pointer ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
+                  onClick={() => router.push(`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}${sourceQuery}`)}
                 >
                   <td className="px-4 py-2"><StatusBadge status={status} /></td>
-                  <td className="px-4 py-2">
-                    <Link
-                      href={`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}${sourceQuery}`}
-                      className="font-mono text-primary hover:underline"
-                    >
-                      {ep.episodeId}
-                    </Link>
-                  </td>
+                  <td className="px-4 py-2 font-mono text-primary">{ep.episodeId}</td>
                   <td className="px-4 py-2 max-w-[400px] text-muted-foreground font-sans">
                     <span className="block truncate">{instruction}</span>
                   </td>
