@@ -3,10 +3,11 @@ import type { TrajectoryStep, RunConfig, ReconstructedMessage } from "@/types/ea
 export function reconstructDefaultPrompt(
   config: RunConfig,
   trajectory: TrajectoryStep[],
-  stepIndex: number
+  stepIndex: number,
+  episodeInstruction?: string,
 ): ReconstructedMessage[] {
   const taskDescription =
-    config.task_config?.description ?? config.task_config?.display_name ?? "Unknown task";
+    episodeInstruction ?? config.task_config?.description ?? config.task_config?.display_name ?? "Unknown task";
 
   // Infer action space from all actions seen in the trajectory
   const actionsSeen = new Set<string>();

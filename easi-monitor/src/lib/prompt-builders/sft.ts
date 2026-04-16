@@ -20,7 +20,8 @@ function sampleEvenly<T>(arr: T[], count: number): T[] {
 export function reconstructSFTPrompt(
   config: RunConfig,
   trajectory: TrajectoryStep[],
-  stepIndex: number
+  stepIndex: number,
+  episodeInstruction?: string,
 ): ReconstructedMessage[] {
   const kwargs = config.task_config?.agent?.prompt_builder_kwargs ?? {};
   const windowSize = (kwargs.window_size as number) ?? 5;
@@ -54,10 +55,9 @@ export function reconstructSFTPrompt(
     sampledHistory = [...sampled, ...recent];
   }
 
-  // Get instruction
+  // Get instruction — prefer episode-level instruction over task config description
   const instruction =
-    config.task_config?.description ??
-    config.task_config?.display_name ??
+    episodeInstruction ??
     "Navigate to complete the task";
 
   // Build content description

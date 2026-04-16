@@ -26,13 +26,22 @@ export default function EpisodePage() {
   const [camera, setCamera] = useState("front");
   const [config, setConfig] = useState<RunConfig | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [episodeInstruction, setEpisodeInstruction] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
       .then((r) => r.json())
       .then((data) => setConfig(data.config ?? null))
       .catch(console.error);
-  }, [task, run, sourceParam]);
+
+    fetch(`/api/episodes?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
+      .then((r) => r.json())
+      .then((eps: Array<{ episodeDir: string; result: { instruction?: string } | null }>) => {
+        const found = eps.find((e) => e.episodeDir === ep);
+        if (found?.result?.instruction) setEpisodeInstruction(found.result.instruction);
+      })
+      .catch(console.error);
+  }, [task, run, ep, sourceParam]);
 
   const handleStepChange = useCallback((s: number) => {
     setCurrentStep(Math.max(0, Math.min(s, (trajectory.length || 1) - 1)));
@@ -127,6 +136,7 @@ export default function EpisodePage() {
             config={config}
             trajectory={trajectory}
             currentStepIndex={currentStep}
+            episodeInstruction={episodeInstruction}
           />
         </div>
       </div>

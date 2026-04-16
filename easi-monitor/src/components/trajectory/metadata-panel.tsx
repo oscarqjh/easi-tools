@@ -12,15 +12,16 @@ interface Props {
   config: RunConfig | null;
   trajectory: TrajectoryStep[];
   currentStepIndex: number;
+  episodeInstruction?: string;
 }
 
-export function MetadataPanel({ step, totalSteps, config, trajectory, currentStepIndex }: Props) {
+export function MetadataPanel({ step, totalSteps, config, trajectory, currentStepIndex, episodeInstruction }: Props) {
   if (!step) {
     return <div className="text-sm text-muted-foreground p-4">No step data available</div>;
   }
 
   const info = step.info ?? {};
-  const prompt = config ? reconstructPrompt(config, trajectory, currentStepIndex) : null;
+  const prompt = config ? reconstructPrompt(config, trajectory, currentStepIndex, episodeInstruction) : null;
 
   return (
     <div className="border border-border rounded-sm">
