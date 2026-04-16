@@ -5,5 +5,5 @@ sources:
   - name: "Local Logs"
     path: /mnt/umm/users/qianjianheng/workspace/eval_results_easi
 
-maps_dir: /mnt/umm/users/qianjianheng/workspace/dfs_vln_traj_gen/outputs/scene_outputs
+maps_dir: /mnt/umm/users/qianjianheng/workspace/EASI/datasets/oscarqjh_LHPR-VLN_easi/maps
 datasets_dir: /mnt/umm/users/qianjianheng/workspace/EASI/datasets
