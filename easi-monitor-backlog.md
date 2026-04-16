@@ -51,9 +51,45 @@
 - [x] Clickable entire row in recent runs table
 - [x] EASI-specific config.json validation for task/run discovery
 
-## Phase 3: Comparison and Analytics
+## Phase 3: Top-Down Map Trajectory Overlay
+Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-time in easi-monitor.
+
+### Prerequisites (one-time offline, requires habitat-sim + GPU)
+- [ ] Generate top-down maps for all LHPR-VLN scenes using `dfs_vln_traj_gen/topdown_map_rendering.py --adaptive`
+- [ ] Store maps in a convention: `maps/{scene_id}/topdown_rgb_floor_{N}.png` + `render_params.json` + `floor_heights.json`
+- [ ] Configure map directory in `monitor.yaml` (e.g., `maps_dir: /path/to/maps`)
+
+### Implementation (easi-monitor, zero habitat-sim dependency)
+- [ ] API route: `GET /api/map?scene=SCENE_ID&floor=N` serves static top-down PNG
+- [ ] API route: `GET /api/map/params?scene=SCENE_ID` returns render_params.json + floor_heights.json
+- [ ] Extract scene ID from episode config (task_config.simulator_configs or episode metadata)
+- [ ] Map overlay component: `<canvas>` rendering trajectory on map image
+- [ ] Coordinate transform (TypeScript, pure math, no dependencies):
+  ```
+  ORTHO_SCALE_FACTOR = 1.632
+  meters_per_pixel = ortho_scale / ORTHO_SCALE_FACTOR  (≈ 0.01225 m/px)
+  pixel_x = (agent_pose[0] - center_x) / mpp + width / 2
+  pixel_y = (agent_pose[2] - center_z) / mpp + height / 2
+  ```
+  agent_pose[0] (world X) → pixel X, agent_pose[2] (world Z) → pixel Y
+  agent_pose[1] (world Y) determines which floor's map PNG to show
+- [ ] Floor selection: compare agent_pose[1] against floor_heights to pick correct map
+- [ ] Trajectory rendering: past path as dimmed polyline, current position as pulsing dot, future path as dotted line
+- [ ] Direction indicator: arrow/triangle at current position based on agent rotation
+- [ ] Sync with frame scrubber: dot moves as user steps through trajectory
+- [ ] Add map panel to trajectory viewer page (alongside frame viewer + metadata panel)
+
+### Technical notes
+- Source: `/mnt/umm/users/qianjianheng/workspace/dfs_vln_traj_gen/`
+- Map generation uses habitat_sim orthographic camera looking straight down (-Y), UP=(0,0,-1)
+- render_params.json format: `{width, height, ortho_scale, center_x, center_z}`
+- floor_heights.json format: `{floor_heights: [0.103, 2.900], num_floors: 2}`
+- Map resolution: adaptive 2048-4096px based on scene bounding box
+- agent_pose in EASI trajectory.jsonl: `[x, y, z, rx, ry, rz]` — same coordinate system as map generation (confirmed via bridge.py:263-268, position comes directly from habitat_sim agent)
+- Rotation in agent_pose is currently `[0,0,0]` (hardcoded in bridge.py) — agent_rotation quaternion is available in sim_info metadata but not exposed yet. Direction arrow may need bridge.py update to include rotation.
+
+## Phase 3b: Comparison and Analytics
 - [ ] Side-by-side episode comparison (two trajectory viewers)
-- [ ] 2D map visualization of agent path (using pose data)
 - [ ] Aggregate analytics dashboard (token usage trends, timing breakdowns)
 - [ ] Run diff view (compare metrics between two runs)
 
