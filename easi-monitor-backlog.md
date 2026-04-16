@@ -116,6 +116,22 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [x] Progress indicator during export (SSE streaming frame count)
 - [ ] Batch export: export all episodes for a run
 
+## Code Review Fixes (Complete)
+- [x] Path traversal prevention: `validateSource()` + `sanitizeSegment()` in all API routes
+- [x] `fileId` regex validation in export-video POST
+- [x] Double-close timeout fix in export-video SSE
+- [x] Frame cache debounce bug (hardcoded 150ms → computed debounceMs)
+- [x] Map overlay floor filtering for multi-floor scenes
+- [x] EpisodeHeader dedup: accepts props to skip redundant API calls
+- [x] `timeAgo` extracted to shared utility
+- [x] Removed unused TaskSelector and RunSelector components
+- [x] `import re` moved to top-level in export_video.py
+- [ ] Add server-side caching (TTL) for discoverTasks/discoverRuns to reduce disk I/O (deferred)
+- [ ] Switch to async fs.promises in API routes for better concurrency (deferred)
+- [ ] Cache AdmZip instances per zip path to avoid re-parsing (deferred)
+- [ ] Add error states to hooks (currently swallow errors with console.error) (deferred)
+- [ ] Replace hardcoded hex colors with CSS custom properties where possible (deferred)
+
 ## Phase 5: Task Execution
 - [ ] Manual task start from UI (POST /api/task/start → spawns easi start subprocess)
 - [ ] Task status tracking (PID file, stdout tailing)

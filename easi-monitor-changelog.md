@@ -1,5 +1,26 @@
 # easi-monitor Changelog
 
+## [0.5.2] - 2026-04-17
+
+### Security
+- Path traversal prevention: all API routes validate `source` param against configured sources
+- Input sanitization: `task`, `run`, `ep`, `scene` params reject `..`, `/`, `\`, null bytes
+- `fileId` in export-video POST validated with regex (`^easi_export_[\w-]+$`)
+- Created `src/lib/security.ts` with `validateSource()` and `sanitizeSegment()` shared utilities
+
+### Fixed
+- Frame cache debounce bug: `setTimeout` now uses computed `debounceMs` (was hardcoded 150ms, ignoring 30ms during playback)
+- Map overlay floor filtering: trajectory points now filtered by current floor (multi-floor scenes no longer show wrong-floor points)
+- Double-close timeout in export-video SSE: `clearTimeout` called when process completes normally
+- EpisodeHeader no longer makes redundant API calls (accepts config/result as props from parent)
+- `import re` moved to top-level in `export_video.py`
+
+### Changed
+- `timeAgo` extracted to shared `src/lib/episode-utils.ts` (was duplicated in page.tsx and task page)
+- Removed unused components: `TaskSelector`, `RunSelector` (from pre-routing era)
+
+---
+
 ## [0.5.1] - 2026-04-16
 
 ### Added
