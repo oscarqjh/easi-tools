@@ -40,21 +40,44 @@
 - [x] Metric cards with colored left accent borders
 - [x] Empty state with icon when filters return 0 results
 
-## Phase 2: Comparison and Analytics
+## Phase 2: Overview-First Homepage (Current)
+- [ ] Overview homepage: aggregate stats, task cards, recent runs table (zero clicks to see data)
+- [ ] New page: /task/[name] — task detail with run list + comparison chart
+- [ ] New page: /task/[name]/[run] — run detail with metrics + episode list
+- [ ] New API: /api/overview — aggregate stats across all tasks
+- [ ] Breadcrumb-based navigation replacing dropdown selectors
+- [ ] Deep-linkable URLs for every view
+
+## Phase 3: Comparison and Analytics
 - [ ] Side-by-side episode comparison (two trajectory viewers)
 - [ ] 2D map visualization of agent path (using pose data)
 - [ ] Aggregate analytics dashboard (token usage trends, timing breakdowns)
 - [ ] Run diff view (compare metrics between two runs)
 
-## Phase 3: Configuration and Polish
-- [ ] Multi-directory config file support
+## Phase 4: Multi-Source and Configuration
+- [ ] Multiple results directories (comma-separated EASI_LOGS_DIR or monitor.yaml config)
+- [ ] Merged task discovery across multiple directories
 - [ ] Export features (episode report, metrics CSV)
-- [ ] Real-time monitoring (watch for new runs while app is open)
 - [ ] Thumbnail generation and caching
 - [ ] URL sharing (deep links to specific episodes/steps)
 
+## Phase 5: Task Execution
+- [ ] Manual task start from UI (POST /api/task/start → spawns easi start subprocess)
+- [ ] Task status tracking (PID file, stdout tailing)
+- [ ] Task stop from UI (kill subprocess)
+- [ ] "New Run" form on task detail page (pre-filled from last run's config)
+
+## Phase 6: Watcher Integration
+- [ ] Watcher control panel page (/control-panel)
+- [ ] Start/stop/restart autoeval watcher from UI
+- [ ] Watcher status display (running/stopped, current checkpoint)
+- [ ] autoeval.yaml config editor in UI (read/write)
+- [ ] Live watcher log streaming (SSE or websocket)
+- [ ] Process management: PID state file, re-attach on restart
+
 ## Ideas (Unscoped)
 - Authentication / multi-user support
+- Real-time monitoring (watch for new runs while app is open)
 - Annotation system (mark interesting steps/episodes with notes)
 - Heatmap overlay on frames (attention visualization)
 - Action distribution charts per episode
