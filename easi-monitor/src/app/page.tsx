@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useOverview } from "@/lib/hooks";
 import { Inbox } from "lucide-react";
 
@@ -73,6 +74,7 @@ function OverviewSkeleton() {
 
 export default function Dashboard() {
   const { data, loading } = useOverview();
+  const router = useRouter();
 
   if (loading) return <OverviewSkeleton />;
 
@@ -171,16 +173,10 @@ export default function Dashboard() {
               {data.recentRuns.map((run, idx) => (
                 <tr
                   key={`${run.task}-${run.runId}`}
-                  className={`border-b border-border hover:bg-[#252535] transition-colors ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
+                  className={`border-b border-border hover:bg-[#252535] transition-colors cursor-pointer ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
+                  onClick={() => router.push(`/task/${encodeURIComponent(run.task)}/${encodeURIComponent(run.runId)}`)}
                 >
-                  <td className="px-4 py-2">
-                    <Link
-                      href={`/task/${encodeURIComponent(run.task)}/${encodeURIComponent(run.runId)}`}
-                      className="font-mono text-primary hover:underline text-xs"
-                    >
-                      {run.task}
-                    </Link>
-                  </td>
+                  <td className="px-4 py-2 font-mono text-primary text-xs">{run.task}</td>
                   <td className="px-4 py-2 font-mono text-xs">{run.model}</td>
                   <td className="px-4 py-2 text-right font-mono text-xs">
                     {run.successRate !== null ? `${(run.successRate * 100).toFixed(1)}%` : "\u2014"}
