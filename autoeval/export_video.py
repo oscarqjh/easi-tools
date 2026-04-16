@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -92,7 +93,6 @@ def get_scene_id(run_dir: Path, episode_dir_name: str, datasets_dir: Path | None
         return None
 
     # Extract index from episode dir name (e.g., "019_ep_19" -> 19)
-    import re
     match = re.match(r"^(\d+)_", episode_dir_name)
     if not match:
         return None

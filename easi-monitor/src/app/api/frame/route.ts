@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { loadConfig } from "@/lib/config";
 import { getEpisodePath } from "@/lib/data";
 import { extractFromZip } from "@/lib/zip";
+import { validateSource, sanitizeSegment } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
   const task = request.nextUrl.searchParams.get("task");
@@ -17,12 +17,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "task, run, ep, and step parameters required" }, { status: 400 });
   }
 
-  const config = loadConfig();
-  const logsDir = sourcePath ?? config.sources[0]?.path ?? "";
+  let logsDir: string;
+  let safeTask: string;
+  let safeRun: string;
+  let safeEp: string;
+  try {
+    logsDir = validateSource(sourcePath);
+    safeTask = sanitizeSegment(task);
+    safeRun = sanitizeSegment(run);
+    safeEp = sanitizeSegment(ep);
+  } catch {
+    return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
+  }
 
   const stepNum = parseInt(step, 10);
   const filename = `step_${String(stepNum).padStart(4, "0")}_${camera}.png`;
-  const epPath = getEpisodePath(logsDir, task, run, ep);
+  const epPath = getEpisodePath(logsDir, safeTask, safeRun, safeEp);
 
   // Try loose file first
   const loosePath = path.join(epPath, filename);

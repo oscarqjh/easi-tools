@@ -12,7 +12,7 @@ import { PlaybackControls } from "@/components/trajectory/playback-controls";
 import { MetadataPanel } from "@/components/trajectory/metadata-panel";
 import { EpisodeHeader } from "@/components/trajectory/episode-header";
 import { formatRunLabel } from "@/lib/episode-utils";
-import type { RunConfig } from "@/types/easi";
+import type { RunConfig, EpisodeResult } from "@/types/easi";
 
 export default function EpisodePage() {
   const params = useParams<{ task: string; run: string; ep: string }>();
@@ -34,6 +34,7 @@ export default function EpisodePage() {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [episodeInstruction, setEpisodeInstruction] = useState<string | undefined>(undefined);
+  const [episodeResult, setEpisodeResult] = useState<EpisodeResult | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exportFps, setExportFps] = useState(5);
   const [exportProgress, setExportProgress] = useState<{ current: number; total: number } | null>(null);
@@ -46,9 +47,12 @@ export default function EpisodePage() {
 
     fetch(`/api/episodes?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
       .then((r) => r.json())
-      .then((eps: Array<{ episodeDir: string; result: { instruction?: string } | null }>) => {
+      .then((eps: Array<{ episodeDir: string; result: EpisodeResult | null }>) => {
         const found = eps.find((e) => e.episodeDir === ep);
-        if (found?.result?.instruction) setEpisodeInstruction(found.result.instruction);
+        if (found?.result) {
+          setEpisodeResult(found.result);
+          if (found.result.instruction) setEpisodeInstruction(found.result.instruction as string);
+        }
       })
       .catch(console.error);
   }, [task, run, ep, sourceParam]);
@@ -122,7 +126,7 @@ export default function EpisodePage() {
       </div>
 
       <div className="flex items-center justify-between">
-        <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} />
+        <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} config={config} result={episodeResult} />
       </div>
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5">

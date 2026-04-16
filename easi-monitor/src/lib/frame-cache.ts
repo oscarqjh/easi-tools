@@ -153,7 +153,7 @@ class FrameCache {
           .catch(() => {})
           .finally(() => this.loading.delete(key));
       }
-    }, 150);
+    }, debounceMs);
   }
 
   private evict(): void {

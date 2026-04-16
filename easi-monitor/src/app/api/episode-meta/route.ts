@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { loadConfig } from "@/lib/config";
+import { validateSource, sanitizeSegment } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
   const task = request.nextUrl.searchParams.get("task");
@@ -13,15 +14,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "task, run, ep required" }, { status: 400 });
   }
 
+  let logsDir: string;
+  let safeTask: string;
+  let safeRun: string;
+  let safeEp: string;
+  try {
+    logsDir = validateSource(sourcePath);
+    safeTask = sanitizeSegment(task);
+    safeRun = sanitizeSegment(run);
+    safeEp = sanitizeSegment(epDir);
+  } catch {
+    return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
+  }
+
   const config = loadConfig();
   if (!config.datasets_dir) {
     return NextResponse.json({ error: "datasets_dir not configured" }, { status: 500 });
   }
 
-  const logsDir = sourcePath ?? config.sources[0]?.path ?? "";
-
   // Read run config to get dataset info
-  const configPath = path.join(logsDir, task, run, "config.json");
+  const configPath = path.join(logsDir, safeTask, safeRun, "config.json");
   if (!fs.existsSync(configPath)) {
     return NextResponse.json({ error: "run config not found" }, { status: 404 });
   }
@@ -46,7 +58,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Extract episode index from episode directory name (e.g., "019_ep_19" -> 19)
-  const indexMatch = epDir.match(/^(\d+)_/);
+  const indexMatch = safeEp.match(/^(\d+)_/);
   if (!indexMatch) {
     return NextResponse.json({ error: "cannot parse episode index from dir name" }, { status: 400 });
   }

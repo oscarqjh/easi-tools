@@ -1,5 +1,23 @@
 import type { EpisodeInfo } from "@/types/easi";
 
+export function timeAgo(dateStr: string): string {
+  const now = Date.now();
+  // dateStr format: "YYYY-MM-DD HH:MM" (local time from log folder name)
+  const parsed = Date.parse(dateStr.replace(" ", "T"));
+  if (isNaN(parsed)) return dateStr;
+  const diffMs = now - parsed;
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay < 30) return `${diffDay}d ago`;
+  const diffMonth = Math.floor(diffDay / 30);
+  return `${diffMonth}mo ago`;
+}
+
 export function getEpisodeStatus(ep: EpisodeInfo): "success" | "fail" | "early_stop" | "unknown" {
   if (!ep.result) return "unknown";
   if (ep.result.forced_early_stop) return "early_stop";

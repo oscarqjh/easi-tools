@@ -139,11 +139,13 @@ export function MapOverlay({ sceneId, trajectory, currentStep, onStepClick }: Pr
       };
     };
 
-    // Collect valid trajectory points
+    // Collect valid trajectory points, filtered by current floor
+    const floorHeights = meta.floor_heights?.floor_heights;
     const points: { x: number; y: number; step: number }[] = [];
     for (let i = 0; i < trajectory.length; i++) {
       const pose = trajectory[i]?.agent_pose;
       if (!pose || pose.length < 3) continue;
+      if (floorHeights && getFloor(pose[1], floorHeights) !== currentFloor) continue;
       const c = toCanvas(pose[0], pose[2]);
       points.push({ x: c.x, y: c.y, step: i });
     }
@@ -220,7 +222,7 @@ export function MapOverlay({ sceneId, trajectory, currentStep, onStepClick }: Pr
       ctx.arc(cur.x, cur.y, 10, 0, Math.PI * 2);
       ctx.stroke();
     }
-  }, [meta, trajectory, currentStep, imgLoaded]);
+  }, [meta, trajectory, currentStep, currentFloor, imgLoaded]);
 
   useEffect(() => {
     draw();

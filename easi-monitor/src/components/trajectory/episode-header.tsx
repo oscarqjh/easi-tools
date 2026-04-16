@@ -9,20 +9,26 @@ interface Props {
   run: string;
   ep: string;
   sourcePath?: string | null;
+  config?: RunConfig | null;
+  result?: EpisodeResult | null;
 }
 
-export function EpisodeHeader({ task, run, ep, sourcePath }: Props) {
-  const [result, setResult] = useState<EpisodeResult | null>(null);
-  const [config, setConfig] = useState<RunConfig | null>(null);
+export function EpisodeHeader({ task, run, ep, sourcePath, config: configProp, result: resultProp }: Props) {
+  const [result, setResult] = useState<EpisodeResult | null>(resultProp ?? null);
+  const [config, setConfig] = useState<RunConfig | null>(configProp ?? null);
 
   const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
 
   useEffect(() => {
+    if (configProp !== undefined) return;
     fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
       .then((r) => r.json())
       .then((data) => setConfig(data.config ?? null))
       .catch(console.error);
+  }, [task, run, sourceParam, configProp]);
 
+  useEffect(() => {
+    if (resultProp !== undefined) return;
     fetch(`/api/episodes?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
       .then((r) => r.json())
       .then((eps: Array<{ episodeDir: string; result: EpisodeResult | null }>) => {
@@ -30,7 +36,7 @@ export function EpisodeHeader({ task, run, ep, sourcePath }: Props) {
         if (found?.result) setResult(found.result);
       })
       .catch(console.error);
-  }, [task, run, ep, sourceParam]);
+  }, [task, run, ep, sourceParam, resultProp]);
 
   if (!result) return null;
 

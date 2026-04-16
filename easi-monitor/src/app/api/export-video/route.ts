@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { loadConfig } from "@/lib/config";
+import { validateSource, sanitizeSegment } from "@/lib/security";
 
 function findPython(scriptDir: string): string {
   const candidates = [
@@ -44,18 +45,30 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "task, run, and ep parameters required" }, { status: 400 });
   }
 
+  let logsDir: string;
+  let safeTask: string;
+  let safeRun: string;
+  let safeEp: string;
+  try {
+    logsDir = validateSource(sourcePath);
+    safeTask = sanitizeSegment(task);
+    safeRun = sanitizeSegment(run);
+    safeEp = sanitizeSegment(ep);
+  } catch {
+    return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
+  }
+
   const config = loadConfig();
-  const logsDir = sourcePath ?? config.sources[0]?.path ?? "";
-  const runDir = path.join(logsDir, task, run);
+  const runDir = path.join(logsDir, safeTask, safeRun);
 
   if (!fs.existsSync(path.join(runDir, "config.json"))) {
     return NextResponse.json({ error: "run directory not found" }, { status: 404 });
   }
 
-  const outputPath = path.join(os.tmpdir(), `easi_export_${task}_${ep}_${Date.now()}.mp4`);
+  const outputPath = path.join(os.tmpdir(), `easi_export_${safeTask}_${safeEp}_${Date.now()}.mp4`);
   const scriptDir = path.resolve(process.cwd(), "..");
   const python = findPython(scriptDir);
-  const args = buildArgs(config, runDir, ep, outputPath, fps);
+  const args = buildArgs(config, runDir, safeEp, outputPath, fps);
 
   if (stream) {
     // SSE mode: stream progress, then signal completion with fileId
@@ -78,23 +91,24 @@ export async function GET(request: NextRequest) {
           }
         });
 
+        const timer = setTimeout(() => {
+          proc.kill();
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "error", message: "Export timed out" })}\n\n`));
+          controller.close();
+        }, 300000);
+
         proc.on("close", (code) => {
+          clearTimeout(timer);
           if (code !== 0 || !fs.existsSync(outputPath)) {
             const event = JSON.stringify({ type: "error", message: stderr.slice(-500) });
             controller.enqueue(encoder.encode(`data: ${event}\n\n`));
           } else {
             const fileId = path.basename(outputPath, ".mp4");
-            const event = JSON.stringify({ type: "done", fileId, filename: `${task}_${ep}.mp4` });
+            const event = JSON.stringify({ type: "done", fileId, filename: `${safeTask}_${safeEp}.mp4` });
             controller.enqueue(encoder.encode(`data: ${event}\n\n`));
           }
           controller.close();
         });
-
-        setTimeout(() => {
-          proc.kill();
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "error", message: "Export timed out" })}\n\n`));
-          controller.close();
-        }, 300000);
       },
     });
 
@@ -114,7 +128,13 @@ export async function GET(request: NextRequest) {
     proc.stderr.on("data", (data) => { stderr += data.toString(); });
     proc.stdout.on("data", (data) => { process.stdout.write(data); });
 
+    const timer = setTimeout(() => {
+      proc.kill();
+      resolve(NextResponse.json({ error: "Export timed out" }, { status: 504 }));
+    }, 300000);
+
     proc.on("close", (code) => {
+      clearTimeout(timer);
       if (code !== 0 || !fs.existsSync(outputPath)) {
         resolve(NextResponse.json({ error: `Export failed (exit code ${code}): ${stderr.slice(-500)}` }, { status: 500 }));
         return;
@@ -124,22 +144,22 @@ export async function GET(request: NextRequest) {
       resolve(new NextResponse(videoData, {
         headers: {
           "Content-Type": "video/mp4",
-          "Content-Disposition": `attachment; filename="${task}_${ep}.mp4"`,
+          "Content-Disposition": `attachment; filename="${safeTask}_${safeEp}.mp4"`,
           "Content-Length": String(videoData.length),
         },
       }));
     });
-
-    setTimeout(() => {
-      proc.kill();
-      resolve(NextResponse.json({ error: "Export timed out" }, { status: 504 }));
-    }, 300000);
   });
 }
 
 /** Serve a completed export file by ID. */
 export async function POST(request: NextRequest) {
   const { fileId } = await request.json();
+
+  if (!fileId || typeof fileId !== "string" || !/^easi_export_[\w-]+$/.test(fileId)) {
+    return NextResponse.json({ error: "Invalid fileId" }, { status: 400 });
+  }
+
   const outputPath = path.join(os.tmpdir(), `${fileId}.mp4`);
 
   if (!fs.existsSync(outputPath)) {
