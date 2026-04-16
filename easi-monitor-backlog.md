@@ -102,7 +102,7 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [x] Backwards compatible with EASI_LOGS_DIR env var fallback
 - [x] EASI-specific config.json validation for discovery
 - [ ] Settings page (/settings) for managing sources from UI (deferred)
-- [ ] Export: benchmark TSV download (deferred)
+- [ ] Export: benchmark TSV download (blocker: TSV lives in autoeval output_dir, not in results source dir — would need to either replicate autoeval post-processing on server side, or add a configurable benchmark_dir to monitor.yaml)
 - [ ] Thumbnail generation and caching (deferred)
 
 ## Phase 4.5: Video Export (Complete)
@@ -112,8 +112,8 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [x] UI: "Export Video" button on episode page with spinner and direct download
 - [x] Uses opencv + PIL (available in easi venv, no ffmpeg needed)
 - [x] Renders at 5 fps, 1324x512 (frame + map + metadata panels)
-- [ ] Configurable FPS from UI (currently hardcoded to 5)
-- [ ] Progress indicator during export (currently just spinner)
+- [x] Configurable FPS from UI (3/5/10 selector)
+- [x] Progress indicator during export (SSE streaming frame count)
 - [ ] Batch export: export all episodes for a run
 
 ## Phase 5: Task Execution
