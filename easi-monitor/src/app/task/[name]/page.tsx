@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useRuns } from "@/lib/hooks";
 import { MetricsChart } from "@/components/dashboard/metrics-chart";
-import { Home, ChevronRight } from "lucide-react";
+import { Home, ChevronRight, Download } from "lucide-react";
+import { useState, useEffect } from "react";
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -54,6 +55,17 @@ export default function TaskDetailPage() {
 
   const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
 
+  // Discover benchmark TSV files
+  const [benchmarkFiles, setBenchmarkFiles] = useState<{ name: string; size: number }[]>([]);
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (sourcePath) params.set("source", sourcePath);
+    fetch(`/api/benchmark?${params}`)
+      .then((r) => r.json())
+      .then(setBenchmarkFiles)
+      .catch(() => {});
+  }, [sourcePath]);
+
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
@@ -66,8 +78,25 @@ export default function TaskDetailPage() {
         <span className="font-mono text-foreground">{taskName}</span>
       </div>
 
-      {/* Title */}
-      <h1 className="text-lg font-bold font-mono uppercase tracking-widest">{taskName}</h1>
+      {/* Title + benchmark download */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-bold font-mono uppercase tracking-widest">{taskName}</h1>
+        {benchmarkFiles.length > 0 && (
+          <div className="flex gap-2">
+            {benchmarkFiles.map((f) => (
+              <a
+                key={f.name}
+                href={`/api/benchmark?file=${encodeURIComponent(f.name)}${sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : ""}`}
+                download={f.name}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-border rounded-sm hover:bg-[#252535] transition-colors text-muted-foreground"
+              >
+                <Download className="size-3.5" />
+                {f.name}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
 
       {loading ? (
         <RunsSkeleton />
