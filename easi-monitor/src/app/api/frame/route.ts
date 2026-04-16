@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { getLogsDir, getEpisodePath } from "@/lib/data";
+import { loadConfig } from "@/lib/config";
+import { getEpisodePath } from "@/lib/data";
 import { extractFromZip } from "@/lib/zip";
 
 export async function GET(request: NextRequest) {
@@ -10,14 +11,18 @@ export async function GET(request: NextRequest) {
   const ep = request.nextUrl.searchParams.get("ep");
   const step = request.nextUrl.searchParams.get("step");
   const camera = request.nextUrl.searchParams.get("camera") ?? "front";
+  const sourcePath = request.nextUrl.searchParams.get("source");
 
   if (!task || !run || !ep || step === null) {
     return NextResponse.json({ error: "task, run, ep, and step parameters required" }, { status: 400 });
   }
 
+  const config = loadConfig();
+  const logsDir = sourcePath ?? config.sources[0]?.path ?? "";
+
   const stepNum = parseInt(step, 10);
   const filename = `step_${String(stepNum).padStart(4, "0")}_${camera}.png`;
-  const epPath = getEpisodePath(getLogsDir(), task, run, ep);
+  const epPath = getEpisodePath(logsDir, task, run, ep);
 
   // Try loose file first
   const loosePath = path.join(epPath, filename);

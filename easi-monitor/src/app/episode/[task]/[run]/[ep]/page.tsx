@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Home, ChevronRight } from "lucide-react";
 import { useTrajectory } from "@/lib/hooks";
@@ -12,22 +12,27 @@ import type { RunConfig } from "@/types/easi";
 
 export default function EpisodePage() {
   const params = useParams<{ task: string; run: string; ep: string }>();
+  const searchParams = useSearchParams();
   const task = decodeURIComponent(params.task);
   const run = decodeURIComponent(params.run);
   const ep = decodeURIComponent(params.ep);
+  const sourcePath = searchParams.get("source");
 
-  const { trajectory, loading } = useTrajectory(task, run, ep);
+  const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
+  const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
+
+  const { trajectory, loading } = useTrajectory(task, run, ep, sourcePath);
   const [currentStep, setCurrentStep] = useState(0);
   const [camera, setCamera] = useState("front");
   const [config, setConfig] = useState<RunConfig | null>(null);
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}`)
+    fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
       .then((r) => r.json())
       .then((data) => setConfig(data.config ?? null))
       .catch(console.error);
-  }, [task, run]);
+  }, [task, run, sourceParam]);
 
   const handleStepChange = useCallback((s: number) => {
     setCurrentStep(Math.max(0, Math.min(s, (trajectory.length || 1) - 1)));
@@ -86,18 +91,18 @@ export default function EpisodePage() {
           Home
         </Link>
         <ChevronRight className="size-3.5" />
-        <Link href={`/task/${encodeURIComponent(task)}`} className="hover:text-foreground">
+        <Link href={`/task/${encodeURIComponent(task)}${sourceQuery}`} className="hover:text-foreground">
           {task}
         </Link>
         <ChevronRight className="size-3.5" />
-        <Link href={`/task/${encodeURIComponent(task)}/${encodeURIComponent(run)}`} className="hover:text-foreground font-mono">
+        <Link href={`/task/${encodeURIComponent(task)}/${encodeURIComponent(run)}${sourceQuery}`} className="hover:text-foreground font-mono">
           {run}
         </Link>
         <ChevronRight className="size-3.5" />
         <span className="font-mono text-foreground">{ep}</span>
       </div>
 
-      <EpisodeHeader task={task} run={run} ep={ep} />
+      <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} />
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <div className="md:col-span-3">
@@ -109,6 +114,7 @@ export default function EpisodePage() {
             onStepChange={handleStepChange}
             playing={playing}
             onPlayingChange={setPlaying}
+            sourcePath={sourcePath}
           />
           <div className="text-[10px] text-muted-foreground/50 font-mono mt-2">
             &larr; &rarr; step &middot; space play/pause

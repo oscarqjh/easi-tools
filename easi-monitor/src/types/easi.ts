@@ -101,6 +101,8 @@ export interface TrajectoryStep {
 export interface TaskInfo {
   name: string;
   runCount: number;
+  source: string;
+  sourcePath: string;
 }
 
 export interface RunInfo {
@@ -110,6 +112,8 @@ export interface RunInfo {
   hasSummary: boolean;
   summary: RunSummary | null;
   config: RunConfig | null;
+  source: string;
+  sourcePath: string;
 }
 
 export interface EpisodeInfo {
@@ -138,6 +142,8 @@ export interface OverviewData {
 export interface OverviewTask {
   name: string;
   runCount: number;
+  source: string;
+  sourcePath: string;
   latestRun: {
     runId: string;
     model: string;
@@ -155,4 +161,6 @@ export interface RecentRun {
   successRate: number | null;
   numEpisodes: number | null;
   hasSummary: boolean;
+  source: string;
+  sourcePath: string;
 }

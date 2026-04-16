@@ -8,26 +8,29 @@ interface Props {
   task: string;
   run: string;
   ep: string;
+  sourcePath?: string | null;
 }
 
-export function EpisodeHeader({ task, run, ep }: Props) {
+export function EpisodeHeader({ task, run, ep, sourcePath }: Props) {
   const [result, setResult] = useState<EpisodeResult | null>(null);
   const [config, setConfig] = useState<RunConfig | null>(null);
 
+  const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
+
   useEffect(() => {
-    fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}`)
+    fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
       .then((r) => r.json())
       .then((data) => setConfig(data.config ?? null))
       .catch(console.error);
 
-    fetch(`/api/episodes?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}`)
+    fetch(`/api/episodes?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
       .then((r) => r.json())
       .then((eps: Array<{ episodeDir: string; result: EpisodeResult | null }>) => {
         const found = eps.find((e) => e.episodeDir === ep);
         if (found?.result) setResult(found.result);
       })
       .catch(console.error);
-  }, [task, run, ep]);
+  }, [task, run, ep, sourceParam]);
 
   if (!result) return null;
 

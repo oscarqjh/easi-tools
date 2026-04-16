@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEpisodes } from "@/lib/hooks";
 import { MetricsPanel } from "@/components/dashboard/metrics-panel";
 import { EpisodeList } from "@/components/dashboard/episode-list";
@@ -49,10 +49,15 @@ function EpisodesSkeleton() {
 
 export default function RunDetailPage() {
   const params = useParams<{ name: string; run: string }>();
+  const searchParams = useSearchParams();
   const taskName = decodeURIComponent(params.name);
   const runId = decodeURIComponent(params.run);
+  const sourcePath = searchParams.get("source");
 
-  const { episodes, loading: episodesLoading } = useEpisodes(taskName, runId);
+  const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
+  const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
+
+  const { episodes, loading: episodesLoading } = useEpisodes(taskName, runId, sourcePath);
 
   const [summary, setSummary] = useState<RunSummary | null>(null);
   const [config, setConfig] = useState<RunConfig | null>(null);
@@ -64,7 +69,7 @@ export default function RunDetailPage() {
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   useEffect(() => {
-    fetch(`/api/run?task=${encodeURIComponent(taskName)}&run=${encodeURIComponent(runId)}`)
+    fetch(`/api/run?task=${encodeURIComponent(taskName)}&run=${encodeURIComponent(runId)}${sourceParam}`)
       .then((r) => r.json())
       .then((data) => {
         setSummary(data.summary ?? null);
@@ -72,7 +77,7 @@ export default function RunDetailPage() {
       })
       .catch(console.error)
       .finally(() => setRunLoading(false));
-  }, [taskName, runId]);
+  }, [taskName, runId, sourceParam]);
 
   const model = config?.cli_options?.model
     ? config.cli_options.model.split("/").pop() ?? runId
@@ -106,7 +111,7 @@ export default function RunDetailPage() {
           Home
         </Link>
         <ChevronRight className="size-3.5" />
-        <Link href={`/task/${encodeURIComponent(taskName)}`} className="hover:text-foreground">
+        <Link href={`/task/${encodeURIComponent(taskName)}${sourceQuery}`} className="hover:text-foreground">
           {taskName}
         </Link>
         <ChevronRight className="size-3.5" />
@@ -144,9 +149,9 @@ export default function RunDetailPage() {
             <p className="text-sm text-muted-foreground">No episodes match the current filters.</p>
           </div>
         ) : viewMode === "list" ? (
-          <EpisodeList episodes={filteredEpisodes} task={taskName} run={runId} />
+          <EpisodeList episodes={filteredEpisodes} task={taskName} run={runId} sourcePath={sourcePath} />
         ) : (
-          <EpisodeCards episodes={filteredEpisodes} task={taskName} run={runId} />
+          <EpisodeCards episodes={filteredEpisodes} task={taskName} run={runId} sourcePath={sourcePath} />
         )}
       </div>
     </div>

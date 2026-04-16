@@ -8,6 +8,7 @@ interface Props {
   episodes: EpisodeInfo[];
   task: string;
   run: string;
+  sourcePath: string | null;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -25,7 +26,9 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export function EpisodeList({ episodes, task, run }: Props) {
+export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
+  const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
+
   return (
     <div className="border rounded-sm overflow-hidden">
       <table className="w-full text-sm">
@@ -59,7 +62,7 @@ export function EpisodeList({ episodes, task, run }: Props) {
                   <td className="px-4 py-2"><StatusBadge status={status} /></td>
                   <td className="px-4 py-2">
                     <Link
-                      href={`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}`}
+                      href={`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}${sourceQuery}`}
                       className="font-mono text-primary hover:underline"
                     >
                       {ep.episodeId}

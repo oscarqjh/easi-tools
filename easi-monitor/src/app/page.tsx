@@ -84,7 +84,7 @@ export default function Dashboard() {
         <Inbox className="size-12 text-muted-foreground/50 mx-auto mb-4" />
         <h2 className="text-xl font-semibold mb-2">No tasks found</h2>
         <p className="text-muted-foreground">
-          Set EASI_LOGS_DIR environment variable to point to your evaluation logs directory.
+          Configure sources in monitor.yaml or set EASI_LOGS_DIR environment variable.
         </p>
       </div>
     );
@@ -96,6 +96,8 @@ export default function Dashboard() {
     { label: "Episodes", value: data.totalEpisodes.toLocaleString(), accent: "border-l-[#FBBF24]" },
     { label: "Avg Success Rate", value: `${(data.avgSuccessRate * 100).toFixed(1)}%`, accent: "border-l-[#34D399]" },
   ];
+
+  const hasMultipleSources = new Set(data.tasks.map(t => t.source)).size > 1;
 
   return (
     <div className="space-y-8">
@@ -124,11 +126,18 @@ export default function Dashboard() {
         <div className="space-y-2">
           {data.tasks.map((task) => (
             <Link
-              key={task.name}
-              href={`/task/${encodeURIComponent(task.name)}`}
+              key={`${task.sourcePath}:${task.name}`}
+              href={`/task/${encodeURIComponent(task.name)}?source=${encodeURIComponent(task.sourcePath)}`}
               className="block border border-border rounded-sm p-4 hover:bg-[#252535] transition-colors"
             >
-              <div className="font-mono text-sm text-foreground">{task.name}</div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm text-foreground">{task.name}</span>
+                {hasMultipleSources && (
+                  <span className="text-[10px] text-muted-foreground font-sans px-1.5 py-0.5 bg-[#1C1C28] rounded-sm">
+                    {task.source}
+                  </span>
+                )}
+              </div>
               <div className="text-xs text-muted-foreground font-sans mt-1">
                 {task.runCount} run{task.runCount !== 1 ? "s" : ""}
                 {task.latestRun && (
@@ -163,6 +172,9 @@ export default function Dashboard() {
             <thead>
               <tr className="border-b bg-[#1C1C28]">
                 <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Task</th>
+                {hasMultipleSources && (
+                  <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Source</th>
+                )}
                 <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Model</th>
                 <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">SR</th>
                 <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Episodes</th>
@@ -172,11 +184,14 @@ export default function Dashboard() {
             <tbody>
               {data.recentRuns.map((run, idx) => (
                 <tr
-                  key={`${run.task}-${run.runId}`}
+                  key={`${run.sourcePath}:${run.task}-${run.runId}`}
                   className={`border-b border-border hover:bg-[#252535] transition-colors cursor-pointer ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
-                  onClick={() => router.push(`/task/${encodeURIComponent(run.task)}/${encodeURIComponent(run.runId)}`)}
+                  onClick={() => router.push(`/task/${encodeURIComponent(run.task)}/${encodeURIComponent(run.runId)}?source=${encodeURIComponent(run.sourcePath)}`)}
                 >
                   <td className="px-4 py-2 font-mono text-primary text-xs">{run.task}</td>
+                  {hasMultipleSources && (
+                    <td className="px-4 py-2 text-xs text-muted-foreground">{run.source}</td>
+                  )}
                   <td className="px-4 py-2 font-mono text-xs">{run.model}</td>
                   <td className="px-4 py-2 text-right font-mono text-xs">
                     {run.successRate !== null ? `${(run.successRate * 100).toFixed(1)}%` : "\u2014"}
@@ -191,7 +206,7 @@ export default function Dashboard() {
               ))}
               {data.recentRuns.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={hasMultipleSources ? 6 : 5} className="px-4 py-8 text-center text-muted-foreground">
                     No runs found.
                   </td>
                 </tr>

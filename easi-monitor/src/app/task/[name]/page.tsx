@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useRuns } from "@/lib/hooks";
 import { MetricsChart } from "@/components/dashboard/metrics-chart";
 import { Home, ChevronRight } from "lucide-react";
@@ -47,8 +47,12 @@ function RunsSkeleton() {
 
 export default function TaskDetailPage() {
   const params = useParams<{ name: string }>();
+  const searchParams = useSearchParams();
   const taskName = decodeURIComponent(params.name);
-  const { runs, loading } = useRuns(taskName);
+  const sourcePath = searchParams.get("source");
+  const { runs, loading } = useRuns(taskName, sourcePath);
+
+  const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
 
   return (
     <div className="space-y-6">
@@ -124,7 +128,7 @@ export default function TaskDetailPage() {
                         >
                           <td className="px-4 py-2">
                             <Link
-                              href={`/task/${encodeURIComponent(taskName)}/${encodeURIComponent(run.runId)}`}
+                              href={`/task/${encodeURIComponent(taskName)}/${encodeURIComponent(run.runId)}${sourceQuery}`}
                               className="font-mono text-primary hover:underline text-xs"
                             >
                               {run.model}

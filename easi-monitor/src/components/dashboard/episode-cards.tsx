@@ -8,6 +8,7 @@ interface Props {
   episodes: EpisodeInfo[];
   task: string;
   run: string;
+  sourcePath: string | null;
 }
 
 const statusConfig: Record<string, { label: string; badgeBg: string; borderColor: string }> = {
@@ -17,7 +18,10 @@ const statusConfig: Record<string, { label: string; badgeBg: string; borderColor
   unknown: { label: "UNKNOWN", badgeBg: "bg-[#64748B]", borderColor: "border-l-[#64748B]" },
 };
 
-export function EpisodeCards({ episodes, task, run }: Props) {
+export function EpisodeCards({ episodes, task, run, sourcePath }: Props) {
+  const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
+  const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
       {episodes.map((ep) => {
@@ -27,7 +31,7 @@ export function EpisodeCards({ episodes, task, run }: Props) {
         return (
           <Link
             key={ep.episodeDir}
-            href={`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}`}
+            href={`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}${sourceQuery}`}
           >
             <div className={`cursor-pointer bg-card border border-border border-l-2 ${cfg.borderColor} rounded-sm hover:bg-[#252535] transition-colors`}>
               <div className="p-4">
@@ -35,7 +39,7 @@ export function EpisodeCards({ episodes, task, run }: Props) {
                   {ep.hasImages ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
-                      src={`/api/frame?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}&ep=${encodeURIComponent(ep.episodeDir)}&step=0&camera=front`}
+                      src={`/api/frame?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}&ep=${encodeURIComponent(ep.episodeDir)}&step=0&camera=front${sourceParam}`}
                       alt={ep.episodeId}
                       className="w-full h-full object-cover"
                       loading="lazy"

@@ -11,17 +11,19 @@ class FrameCache {
   private loading = new Map<string, AbortController>();
   private prefetchTimer: ReturnType<typeof setTimeout> | null = null;
 
-  private makeKey(task: string, run: string, ep: string, step: number, camera: string): string {
-    return `${task}/${run}/${ep}/${step}/${camera}`;
+  private makeKey(task: string, run: string, ep: string, step: number, camera: string, source?: string | null): string {
+    return `${source ?? ""}/${task}/${run}/${ep}/${step}/${camera}`;
   }
 
-  makeUrl(task: string, run: string, ep: string, step: number, camera: string): string {
-    return `/api/frame?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}&ep=${encodeURIComponent(ep)}&step=${step}&camera=${camera}`;
+  makeUrl(task: string, run: string, ep: string, step: number, camera: string, source?: string | null): string {
+    const params = new URLSearchParams({ task, run, ep, step: String(step), camera });
+    if (source) params.set("source", source);
+    return `/api/frame?${params.toString()}`;
   }
 
   /** Get cached blob URL, or null if not cached. */
-  getCachedUrl(task: string, run: string, ep: string, step: number, camera: string): string | null {
-    const key = this.makeKey(task, run, ep, step, camera);
+  getCachedUrl(task: string, run: string, ep: string, step: number, camera: string, source?: string | null): string | null {
+    const key = this.makeKey(task, run, ep, step, camera, source);
     const entry = this.cache.get(key);
     if (entry) {
       entry.lastAccess = Date.now();
@@ -31,14 +33,14 @@ class FrameCache {
   }
 
   /** Get blob URL if cached, otherwise the API URL as fallback. */
-  getUrl(task: string, run: string, ep: string, step: number, camera: string): string {
-    return this.getCachedUrl(task, run, ep, step, camera)
-      ?? this.makeUrl(task, run, ep, step, camera);
+  getUrl(task: string, run: string, ep: string, step: number, camera: string, source?: string | null): string {
+    return this.getCachedUrl(task, run, ep, step, camera, source)
+      ?? this.makeUrl(task, run, ep, step, camera, source);
   }
 
   /** Fetch a single frame as blob and cache it. Returns the blob URL. */
-  async fetchFrame(task: string, run: string, ep: string, step: number, camera: string): Promise<string> {
-    const key = this.makeKey(task, run, ep, step, camera);
+  async fetchFrame(task: string, run: string, ep: string, step: number, camera: string, source?: string | null): Promise<string> {
+    const key = this.makeKey(task, run, ep, step, camera, source);
 
     // Already cached
     const existing = this.cache.get(key);
@@ -49,14 +51,14 @@ class FrameCache {
 
     // Already loading — wait for it
     if (this.loading.has(key)) {
-      return this.makeUrl(task, run, ep, step, camera);
+      return this.makeUrl(task, run, ep, step, camera, source);
     }
 
     const controller = new AbortController();
     this.loading.set(key, controller);
 
     try {
-      const resp = await fetch(this.makeUrl(task, run, ep, step, camera), {
+      const resp = await fetch(this.makeUrl(task, run, ep, step, camera, source), {
         signal: controller.signal,
       });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -66,7 +68,7 @@ class FrameCache {
       this.evict();
       return blobUrl;
     } catch {
-      return this.makeUrl(task, run, ep, step, camera);
+      return this.makeUrl(task, run, ep, step, camera, source);
     } finally {
       this.loading.delete(key);
     }
@@ -79,7 +81,7 @@ class FrameCache {
   schedulePrefetch(
     task: string, run: string, ep: string,
     currentStep: number, maxStep: number, camera: string,
-    range: number = 15
+    range: number = 15, source?: string | null,
   ): void {
     // Cancel any pending prefetch scheduling
     if (this.prefetchTimer) {
@@ -109,12 +111,12 @@ class FrameCache {
       }
 
       for (const s of steps) {
-        const key = this.makeKey(task, run, ep, s, camera);
+        const key = this.makeKey(task, run, ep, s, camera, source);
         if (this.cache.has(key) || this.loading.has(key)) continue;
 
         const controller = new AbortController();
         this.loading.set(key, controller);
-        const url = this.makeUrl(task, run, ep, s, camera);
+        const url = this.makeUrl(task, run, ep, s, camera, source);
 
         fetch(url, { signal: controller.signal })
           .then((resp) => {

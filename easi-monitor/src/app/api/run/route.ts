@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { getLogsDir } from "@/lib/data";
+import { loadConfig } from "@/lib/config";
 
 export async function GET(request: NextRequest) {
   const task = request.nextUrl.searchParams.get("task");
   const run = request.nextUrl.searchParams.get("run");
+  const sourcePath = request.nextUrl.searchParams.get("source");
   if (!task || !run) return NextResponse.json({ error: "task and run parameters required" }, { status: 400 });
 
-  const runDir = path.join(getLogsDir(), task, run);
+  const config = loadConfig();
+  const logsDir = sourcePath ?? config.sources[0]?.path ?? "";
+
+  const runDir = path.join(logsDir, task, run);
   const result: Record<string, unknown> = {};
 
   const configPath = path.join(runDir, "config.json");

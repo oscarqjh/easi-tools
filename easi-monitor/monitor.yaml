@@ -1,0 +1,6 @@
+# monitor.yaml — easi-monitor configuration
+# Edit while server is running; changes take effect on next page refresh.
+
+sources:
+  - name: "Local Logs"
+    path: /mnt/umm/users/qianjianheng/workspace/eval_results_easi

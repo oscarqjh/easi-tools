@@ -17,9 +17,10 @@ interface Props {
   onStepChange: (step: number) => void;
   playing: boolean;
   onPlayingChange: (playing: boolean) => void;
+  sourcePath?: string | null;
 }
 
-export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, onStepChange, playing, onPlayingChange }: Props) {
+export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, onStepChange, playing, onPlayingChange, sourcePath }: Props) {
   const [speed, setSpeed] = useState(1);
   const maxStep = Math.max(0, trajectory.length - 1);
   const currentStepRef = useRef(currentStep);
@@ -30,26 +31,26 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
 
   // Load current frame: use blob cache if available, otherwise fetch it
   useEffect(() => {
-    const cached = frameCache.getCachedUrl(task, run, ep, currentStep, camera);
+    const cached = frameCache.getCachedUrl(task, run, ep, currentStep, camera, sourcePath);
     if (cached) {
       setDisplayUrl(cached);
     } else {
       // Set API URL immediately (browser can start loading)
-      setDisplayUrl(frameCache.makeUrl(task, run, ep, currentStep, camera));
+      setDisplayUrl(frameCache.makeUrl(task, run, ep, currentStep, camera, sourcePath));
       // Also fetch as blob for future cache hits
-      frameCache.fetchFrame(task, run, ep, currentStep, camera).then((blobUrl) => {
+      frameCache.fetchFrame(task, run, ep, currentStep, camera, sourcePath).then((blobUrl) => {
         // Only update if still on the same step
         if (currentStepRef.current === currentStep) {
           setDisplayUrl(blobUrl);
         }
       });
     }
-  }, [task, run, ep, currentStep, camera]);
+  }, [task, run, ep, currentStep, camera, sourcePath]);
 
   // Debounced prefetch — only fires 150ms after last step change
   useEffect(() => {
-    frameCache.schedulePrefetch(task, run, ep, currentStep, maxStep, camera);
-  }, [task, run, ep, currentStep, maxStep, camera]);
+    frameCache.schedulePrefetch(task, run, ep, currentStep, maxStep, camera, 15, sourcePath);
+  }, [task, run, ep, currentStep, maxStep, camera, sourcePath]);
 
   // Single playback interval
   useEffect(() => {

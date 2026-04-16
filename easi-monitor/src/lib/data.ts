@@ -5,11 +5,11 @@ import type {
   TaskInfo, RunInfo, EpisodeInfo,
 } from "@/types/easi";
 
-export function getLogsDir(): string {
-  const dir = process.env.EASI_LOGS_DIR;
-  if (dir) return dir;
-  return path.resolve(process.cwd(), "..", "logs");
-}
+/** Internal task info without source metadata (added by API routes). */
+type TaskInfoBase = Omit<TaskInfo, "source" | "sourcePath">;
+
+/** Internal run info without source metadata (added by API routes). */
+type RunInfoBase = Omit<RunInfo, "source" | "sourcePath">;
 
 /** Check if a config.json is from EASI (has run_id and cli_options). */
 function isEasiConfig(configPath: string): boolean {
@@ -21,10 +21,10 @@ function isEasiConfig(configPath: string): boolean {
   }
 }
 
-export function discoverTasks(logsDir: string): TaskInfo[] {
+export function discoverTasks(logsDir: string): TaskInfoBase[] {
   if (!fs.existsSync(logsDir)) return [];
   const entries = fs.readdirSync(logsDir, { withFileTypes: true });
-  const tasks: TaskInfo[] = [];
+  const tasks: TaskInfoBase[] = [];
   for (const entry of entries) {
     if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
     const taskPath = path.join(logsDir, entry.name);
@@ -37,11 +37,11 @@ export function discoverTasks(logsDir: string): TaskInfo[] {
   return tasks.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function discoverRuns(logsDir: string, taskName: string): RunInfo[] {
+export function discoverRuns(logsDir: string, taskName: string): RunInfoBase[] {
   const taskDir = path.join(logsDir, taskName);
   if (!fs.existsSync(taskDir)) return [];
   const entries = fs.readdirSync(taskDir, { withFileTypes: true });
-  const runs: RunInfo[] = [];
+  const runs: RunInfoBase[] = [];
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     const runDir = path.join(taskDir, entry.name);
