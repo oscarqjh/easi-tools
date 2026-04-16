@@ -11,6 +11,7 @@ import { TimelineMarkers } from "@/components/trajectory/timeline-markers";
 import { PlaybackControls } from "@/components/trajectory/playback-controls";
 import { MetadataPanel } from "@/components/trajectory/metadata-panel";
 import { EpisodeHeader } from "@/components/trajectory/episode-header";
+import { formatRunLabel } from "@/lib/episode-utils";
 import type { RunConfig } from "@/types/easi";
 
 export default function EpisodePage() {
@@ -111,7 +112,7 @@ export default function EpisodePage() {
         </Link>
         <ChevronRight className="size-3.5" />
         <Link href={`/task/${encodeURIComponent(task)}/${encodeURIComponent(run)}${sourceQuery}`} className="hover:text-foreground font-mono">
-          {run}
+          {formatRunLabel(run, config?.cli_options?.model)}
         </Link>
         <ChevronRight className="size-3.5" />
         <span className="font-mono text-foreground">{ep}</span>

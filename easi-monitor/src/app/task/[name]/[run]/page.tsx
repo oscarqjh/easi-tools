@@ -11,7 +11,7 @@ import { ViewToggle, type ViewMode } from "@/components/dashboard/view-toggle";
 import {
   EpisodeFilters, type StatusFilter, type SortField, type SortDir,
 } from "@/components/dashboard/episode-filters";
-import { getEpisodeStatus } from "@/lib/episode-utils";
+import { getEpisodeStatus, formatRunLabel } from "@/lib/episode-utils";
 import { Home, ChevronRight, Inbox } from "lucide-react";
 import type { RunSummary, RunConfig } from "@/types/easi";
 
@@ -79,9 +79,7 @@ export default function RunDetailPage() {
       .finally(() => setRunLoading(false));
   }, [taskName, runId, sourceParam]);
 
-  const model = config?.cli_options?.model
-    ? config.cli_options.model.split("/").pop() ?? runId
-    : runId;
+  const runLabel = formatRunLabel(runId, config?.cli_options?.model);
 
   const filteredEpisodes = episodes
     .filter((ep) => statusFilter === "all" || getEpisodeStatus(ep) === statusFilter)
@@ -115,7 +113,7 @@ export default function RunDetailPage() {
           {taskName}
         </Link>
         <ChevronRight className="size-3.5" />
-        <span className="font-mono text-foreground">{model}</span>
+        <span className="font-mono text-foreground">{runLabel}</span>
       </div>
 
       {/* Metrics panel */}
