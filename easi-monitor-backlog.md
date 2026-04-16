@@ -126,10 +126,11 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [x] `timeAgo` extracted to shared utility
 - [x] Removed unused TaskSelector and RunSelector components
 - [x] `import re` moved to top-level in export_video.py
-- [ ] Add server-side caching (TTL) for discoverTasks/discoverRuns to reduce disk I/O (deferred)
+- [x] Server-side TTL caching: discoverTasks (10s), discoverRuns (10s), discoverEpisodes (30s)
+- [x] AdmZip instance caching per zip path (5min TTL)
+- [x] Error states in all hooks (useOverview, useRuns, useEpisodes, useTrajectory, useEpisodeMeta)
+- [x] Error UI in all pages (red text on API failure instead of infinite loading)
 - [ ] Switch to async fs.promises in API routes for better concurrency (deferred)
-- [ ] Cache AdmZip instances per zip path to avoid re-parsing (deferred)
-- [ ] Add error states to hooks (currently swallow errors with console.error) (deferred)
 - [ ] Replace hardcoded hex colors with CSS custom properties where possible (deferred)
 
 ## Phase 5: Task Execution

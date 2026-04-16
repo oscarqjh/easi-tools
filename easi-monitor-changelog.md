@@ -1,5 +1,19 @@
 # easi-monitor Changelog
 
+## [0.6.0] - 2026-04-17
+
+### Added
+- Generic TTL cache (`src/lib/cache.ts`) for server-side in-memory caching
+- Error states in all data-fetching hooks (`useOverview`, `useRuns`, `useEpisodes`, `useTrajectory`, `useEpisodeMeta`)
+- Error UI in all pages: red text message on API failure instead of infinite loading
+
+### Performance
+- `discoverTasks` and `discoverRuns` cached with 10s TTL (avoids re-reading directories on rapid page navigation)
+- `discoverEpisodes` cached with 30s TTL (episode data doesn't change once run completes)
+- `AdmZip` instances cached per zip path with 5min TTL (avoids re-parsing zip central directory on every frame request)
+
+---
+
 ## [0.5.2] - 2026-04-17
 
 ### Security
