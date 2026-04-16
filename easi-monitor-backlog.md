@@ -80,6 +80,12 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [ ] Sync with frame scrubber: dot moves as user steps through trajectory
 - [ ] Add map panel to trajectory viewer page (alongside frame viewer + metadata panel)
 
+### Future enhancements
+- [ ] Add target_coord to bridge.py _build_step_info() (expose sim.info["target coord"] as [x,y,z] in trajectory info)
+- [ ] Render subtask target positions as star markers on the map (read from info.target_coord per step)
+- [ ] Only works for future runs — existing trajectories don't have target coords
+- [ ] Target coords come from SceneSimulator.get_coord() which queries Habitat semantic scene mesh at runtime
+
 ### Technical notes
 - Source: `/mnt/umm/users/qianjianheng/workspace/dfs_vln_traj_gen/`
 - Map generation uses habitat_sim orthographic camera looking straight down (-Y), UP=(0,0,-1)
