@@ -1,5 +1,35 @@
 # easi-monitor Changelog
 
+## [0.2.0] - 2026-04-16
+
+### Added
+- DESIGN.md: "Obsidian Lab" design system (color tokens, typography, spacing, component patterns)
+- Keyboard shortcuts in trajectory viewer: left/right arrow (step), space (play/pause)
+- Step indicator overlay on frame image (N / M badge)
+- Skeleton loading states for dashboard metrics, episodes, and trajectory viewer
+- Welcome/overview placeholder when no run is selected
+- Section grouping: "Select Evaluation", "Run Summary", "Episodes" with bordered containers
+- "Step Details" header bar on metadata panel
+- "Episode" section label on episode header
+- Keyboard shortcuts hint text below frame viewer
+
+### Changed
+- Applied Obsidian Lab theme across all components: custom surface colors (#0A0A0F/#12121A/#1C1C28/#252535), cyan primary (#00D4AA), JetBrains Mono + IBM Plex Sans fonts
+- Frame cache rewritten: blob-based URLs (zero-latency for cached frames), debounced prefetch (150ms), AbortController for stale cancellation, priority-ordered loading, 100-frame LRU
+- All corners changed to rounded-sm (2px) per design system
+- Status badges: solid background, sharp corners, uppercase text
+- Metric cards: colored left accent borders, uppercase tracking labels
+- Chart tooltip: dark themed (#1C1C28 bg)
+- Timeline markers: Obsidian Lab accent colors
+- Playback controls: lucide icons replace unicode symbols
+- Play state lifted to page level for keyboard shortcut integration
+- All lucide icons added for navigation, view toggle, filters, playback
+
+### Fixed
+- Google Fonts @import ordering in globals.css (must precede Tailwind imports)
+
+---
+
 ## [0.1.0] - 2026-04-14
 
 ### Added

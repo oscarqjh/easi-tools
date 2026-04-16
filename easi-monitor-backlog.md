@@ -23,6 +23,23 @@
 - [x] Frame prefetching and LRU cache
 - [ ] Thumbnail generation and caching (deferred)
 
+## Phase 1.5: Design & Polish (Complete)
+- [x] DESIGN.md — Obsidian Lab design system
+- [x] Obsidian Lab theme: custom color tokens, surfaces, accents
+- [x] JetBrains Mono + IBM Plex Sans font integration
+- [x] Lucide icons for playback controls, navigation, view toggle
+- [x] Blob-based frame cache with debounced prefetch and stale cancellation
+- [x] Loading skeleton states for dashboard and trajectory viewer
+- [x] Grouped dashboard sections (Run Summary, Episodes) with containers
+- [x] Welcome/overview state when no run is selected
+- [x] Keyboard shortcuts: arrow keys (step), space (play/pause)
+- [x] Step indicator overlay on frame image
+- [x] Metadata panel with "Step Details" header bar
+- [x] Episode header section label and tighter layout
+- [x] Status badges: solid bg, sharp corners, uppercase
+- [x] Metric cards with colored left accent borders
+- [x] Empty state with icon when filters return 0 results
+
 ## Phase 2: Comparison and Analytics
 - [ ] Side-by-side episode comparison (two trajectory viewers)
 - [ ] 2D map visualization of agent path (using pose data)
@@ -33,7 +50,7 @@
 - [ ] Multi-directory config file support
 - [ ] Export features (episode report, metrics CSV)
 - [ ] Real-time monitoring (watch for new runs while app is open)
-- [ ] Keyboard shortcuts for trajectory navigation
+- [ ] Thumbnail generation and caching
 - [ ] URL sharing (deep links to specific episodes/steps)
 
 ## Ideas (Unscoped)
