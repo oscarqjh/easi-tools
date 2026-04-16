@@ -1,0 +1,156 @@
+"use client";
+
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useRuns } from "@/lib/hooks";
+import { MetricsChart } from "@/components/dashboard/metrics-chart";
+import { Home, ChevronRight } from "lucide-react";
+
+function timeAgo(dateStr: string): string {
+  const now = Date.now();
+  const parsed = Date.parse(dateStr.replace(" ", "T"));
+  if (isNaN(parsed)) return dateStr;
+  const diffMs = now - parsed;
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay < 30) return `${diffDay}d ago`;
+  const diffMonth = Math.floor(diffDay / 30);
+  return `${diffMonth}mo ago`;
+}
+
+function RunsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="h-4 w-96 bg-card rounded-sm animate-pulse" />
+      <div className="border border-border rounded-sm overflow-hidden">
+        <div className="bg-[#1C1C28] px-4 py-2.5">
+          <div className="h-3 w-full bg-muted-foreground/10 rounded-sm animate-pulse" />
+        </div>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex gap-4 px-4 py-3 border-b border-border">
+            <div className="h-4 w-32 bg-muted-foreground/10 rounded-sm animate-pulse" />
+            <div className="h-4 w-24 bg-muted-foreground/10 rounded-sm animate-pulse" />
+            <div className="h-4 w-12 bg-muted-foreground/10 rounded-sm animate-pulse" />
+            <div className="h-4 w-12 bg-muted-foreground/10 rounded-sm animate-pulse" />
+            <div className="h-4 w-16 bg-muted-foreground/10 rounded-sm animate-pulse" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function TaskDetailPage() {
+  const params = useParams<{ name: string }>();
+  const taskName = decodeURIComponent(params.name);
+  const { runs, loading } = useRuns(taskName);
+
+  return (
+    <div className="space-y-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-foreground flex items-center gap-1">
+          <Home className="size-3.5" />
+          Home
+        </Link>
+        <ChevronRight className="size-3.5" />
+        <span className="font-mono text-foreground">{taskName}</span>
+      </div>
+
+      {/* Title */}
+      <h1 className="text-lg font-bold font-mono uppercase tracking-widest">{taskName}</h1>
+
+      {loading ? (
+        <RunsSkeleton />
+      ) : (
+        <>
+          {/* Metrics chart */}
+          {runs.length > 1 && (
+            <div className="border border-border rounded-sm p-4">
+              <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-3">
+                Run Comparison
+              </div>
+              <MetricsChart runs={runs} />
+            </div>
+          )}
+
+          {/* Runs table */}
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-3">
+              Runs &middot; {runs.length}
+            </div>
+            <div className="border border-border rounded-sm overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-[#1C1C28]">
+                    <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Model</th>
+                    <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Date</th>
+                    <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">SR</th>
+                    <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Avg Steps</th>
+                    <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Episodes</th>
+                    <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {runs.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                        No runs found.
+                      </td>
+                    </tr>
+                  ) : (
+                    runs.map((run, idx) => {
+                      const sr = typeof run.summary?.success_rate === "number"
+                        ? `${(run.summary.success_rate * 100).toFixed(1)}%`
+                        : "\u2014";
+                      const avgSteps = typeof run.summary?.avg_steps === "number"
+                        ? String(Math.round(run.summary.avg_steps))
+                        : "\u2014";
+                      const episodes = typeof run.summary?.num_episodes === "number"
+                        ? String(run.summary.num_episodes)
+                        : "\u2014";
+                      const statusLabel = run.hasSummary ? "Complete" : "In Progress";
+                      const statusBg = run.hasSummary ? "bg-[#34D399]" : "bg-[#FBBF24]";
+
+                      return (
+                        <tr
+                          key={run.runId}
+                          className={`border-b border-border hover:bg-[#252535] transition-colors ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
+                        >
+                          <td className="px-4 py-2">
+                            <Link
+                              href={`/task/${encodeURIComponent(taskName)}/${encodeURIComponent(run.runId)}`}
+                              className="font-mono text-primary hover:underline text-xs"
+                            >
+                              {run.model}
+                            </Link>
+                          </td>
+                          <td className="px-4 py-2 text-xs text-muted-foreground">
+                            {timeAgo(run.date)}
+                          </td>
+                          <td className="px-4 py-2 text-right font-mono text-xs">{sr}</td>
+                          <td className="px-4 py-2 text-right font-mono text-xs">{avgSteps}</td>
+                          <td className="px-4 py-2 text-right font-mono text-xs">{episodes}</td>
+                          <td className="px-4 py-2 text-right">
+                            <span className={`${statusBg} text-[#0A0A0F] text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-sm`}>
+                              {statusLabel}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

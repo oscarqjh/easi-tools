@@ -83,12 +83,16 @@ export default function EpisodePage() {
       <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground flex items-center gap-1">
           <Home className="size-3.5" />
-          Dashboard
+          Home
         </Link>
         <ChevronRight className="size-3.5" />
-        <span>{task}</span>
+        <Link href={`/task/${encodeURIComponent(task)}`} className="hover:text-foreground">
+          {task}
+        </Link>
         <ChevronRight className="size-3.5" />
-        <span className="font-mono">{run}</span>
+        <Link href={`/task/${encodeURIComponent(task)}/${encodeURIComponent(run)}`} className="hover:text-foreground font-mono">
+          {run}
+        </Link>
         <ChevronRight className="size-3.5" />
         <span className="font-mono text-foreground">{ep}</span>
       </div>

@@ -1,7 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { TaskInfo, RunInfo, EpisodeInfo, TrajectoryStep } from "@/types/easi";
+import type { TaskInfo, RunInfo, EpisodeInfo, TrajectoryStep, OverviewData } from "@/types/easi";
+
+export function useOverview() {
+  const [data, setData] = useState<OverviewData | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch("/api/overview")
+      .then((r) => r.json())
+      .then(setData)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+  return { data, loading };
+}
 
 export function useTasks() {
   const [tasks, setTasks] = useState<TaskInfo[]>([]);

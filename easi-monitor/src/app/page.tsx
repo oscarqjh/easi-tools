@@ -1,106 +1,82 @@
 "use client";
 
-import { useState } from "react";
-import { useTasks, useRuns, useEpisodes } from "@/lib/hooks";
-import { TaskSelector } from "@/components/dashboard/task-selector";
-import { RunSelector } from "@/components/dashboard/run-selector";
-import { MetricsPanel } from "@/components/dashboard/metrics-panel";
-import { MetricsChart } from "@/components/dashboard/metrics-chart";
-import { EpisodeList } from "@/components/dashboard/episode-list";
-import { EpisodeCards } from "@/components/dashboard/episode-cards";
-import { ViewToggle, type ViewMode } from "@/components/dashboard/view-toggle";
-import {
-  EpisodeFilters, type StatusFilter, type SortField, type SortDir,
-} from "@/components/dashboard/episode-filters";
-import { Card } from "@/components/ui/card";
-import { getEpisodeStatus } from "@/lib/episode-utils";
+import Link from "next/link";
+import { useOverview } from "@/lib/hooks";
 import { Inbox } from "lucide-react";
 
-function MetricsSkeleton() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i} className="p-4 rounded-sm">
-          <div className="h-3 w-20 bg-card rounded-sm animate-pulse mb-3" />
-          <div className="h-7 w-16 bg-card rounded-sm animate-pulse" />
-        </Card>
-      ))}
-    </div>
-  );
+function timeAgo(dateStr: string): string {
+  const now = Date.now();
+  // dateStr format: "YYYY-MM-DD HH:MM" (local time from log folder name)
+  const parsed = Date.parse(dateStr.replace(" ", "T"));
+  if (isNaN(parsed)) return dateStr;
+  const diffMs = now - parsed;
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay < 30) return `${diffDay}d ago`;
+  const diffMonth = Math.floor(diffDay / 30);
+  return `${diffMonth}mo ago`;
 }
 
-function EpisodesSkeleton() {
+function OverviewSkeleton() {
   return (
-    <div className="border rounded-sm overflow-hidden">
-      <div className="bg-[#1C1C28] px-4 py-2.5">
-        <div className="h-3 w-full bg-muted-foreground/10 rounded-sm animate-pulse" />
-      </div>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex gap-4 px-4 py-3 border-b">
-          <div className="h-5 w-16 bg-card rounded-sm animate-pulse" />
-          <div className="h-5 w-24 bg-card rounded-sm animate-pulse" />
-          <div className="h-5 flex-1 bg-card rounded-sm animate-pulse" />
-          <div className="h-5 w-12 bg-card rounded-sm animate-pulse" />
-          <div className="h-5 w-12 bg-card rounded-sm animate-pulse" />
+    <div className="space-y-8">
+      {/* Stat cards skeleton */}
+      <div>
+        <div className="h-3 w-24 bg-card rounded-sm animate-pulse mb-3" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-card border border-border border-l-2 rounded-sm p-3">
+              <div className="h-3 w-20 bg-muted-foreground/10 rounded-sm animate-pulse mb-2" />
+              <div className="h-7 w-16 bg-muted-foreground/10 rounded-sm animate-pulse" />
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
+      {/* Task cards skeleton */}
+      <div>
+        <div className="h-3 w-16 bg-card rounded-sm animate-pulse mb-3" />
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="border border-border rounded-sm p-4">
+              <div className="h-4 w-64 bg-muted-foreground/10 rounded-sm animate-pulse mb-2" />
+              <div className="h-3 w-96 bg-muted-foreground/10 rounded-sm animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Recent runs skeleton */}
+      <div>
+        <div className="h-3 w-28 bg-card rounded-sm animate-pulse mb-3" />
+        <div className="border border-border rounded-sm overflow-hidden">
+          <div className="bg-[#1C1C28] px-4 py-2.5">
+            <div className="h-3 w-full bg-muted-foreground/10 rounded-sm animate-pulse" />
+          </div>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex gap-4 px-4 py-3 border-b border-border">
+              <div className="h-4 w-48 bg-muted-foreground/10 rounded-sm animate-pulse" />
+              <div className="h-4 w-24 bg-muted-foreground/10 rounded-sm animate-pulse" />
+              <div className="h-4 w-12 bg-muted-foreground/10 rounded-sm animate-pulse" />
+              <div className="h-4 w-12 bg-muted-foreground/10 rounded-sm animate-pulse" />
+              <div className="h-4 w-16 bg-muted-foreground/10 rounded-sm animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function Dashboard() {
-  const { tasks, loading: tasksLoading } = useTasks();
-  const [selectedTask, setSelectedTask] = useState<string | null>(null);
-  const [selectedRun, setSelectedRun] = useState<string | null>(null);
-  const { runs, loading: runsLoading } = useRuns(selectedTask);
-  const { episodes, loading: episodesLoading } = useEpisodes(selectedTask, selectedRun);
+  const { data, loading } = useOverview();
 
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [sortField, setSortField] = useState<SortField>("episode");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  if (loading) return <OverviewSkeleton />;
 
-  const currentRun = runs.find((r) => r.runId === selectedRun);
-
-  function handleTaskChange(task: string) {
-    setSelectedTask(task);
-    setSelectedRun(null);
-  }
-
-  const filteredEpisodes = episodes
-    .filter((ep) => statusFilter === "all" || getEpisodeStatus(ep) === statusFilter)
-    .sort((a, b) => {
-      const dir = sortDir === "asc" ? 1 : -1;
-      switch (sortField) {
-        case "steps":
-          return dir * (((a.result?.num_steps as number) ?? 0) - ((b.result?.num_steps as number) ?? 0));
-        case "time":
-          return dir * ((a.result?.elapsed_seconds ?? 0) - (b.result?.elapsed_seconds ?? 0));
-        case "success": {
-          const sa = (a.result?.task_success ?? 0) as number;
-          const sb = (b.result?.task_success ?? 0) as number;
-          return dir * (sa - sb);
-        }
-        default:
-          return dir * a.episodeDir.localeCompare(b.episodeDir);
-      }
-    });
-
-  if (tasksLoading) {
-    return (
-      <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row gap-4 items-start">
-          <div className="flex flex-col gap-1.5">
-            <div className="h-3 w-8 bg-card rounded-sm animate-pulse" />
-            <div className="h-8 w-[300px] bg-card rounded-sm animate-pulse" />
-          </div>
-        </div>
-        <MetricsSkeleton />
-      </div>
-    );
-  }
-
-  if (tasks.length === 0) {
+  if (!data || data.totalTasks === 0) {
     return (
       <div className="text-center py-20">
         <Inbox className="size-12 text-muted-foreground/50 mx-auto mb-4" />
@@ -112,68 +88,122 @@ export default function Dashboard() {
     );
   }
 
+  const statCards = [
+    { label: "Total Runs", value: String(data.totalRuns), accent: "border-l-[#00D4AA]" },
+    { label: "Tasks", value: String(data.totalTasks), accent: "border-l-[#60A5FA]" },
+    { label: "Episodes", value: data.totalEpisodes.toLocaleString(), accent: "border-l-[#FBBF24]" },
+    { label: "Avg Success Rate", value: `${(data.avgSuccessRate * 100).toFixed(1)}%`, accent: "border-l-[#34D399]" },
+  ];
+
   return (
     <div className="space-y-8">
+      {/* Aggregate stats */}
       <div>
-        <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-3">Select Evaluation</div>
-        <div className="flex flex-col sm:flex-row gap-4 items-start">
-          <TaskSelector tasks={tasks} selected={selectedTask} onSelect={handleTaskChange} />
-          {selectedTask && (
-            <RunSelector runs={runs} selected={selectedRun} onSelect={setSelectedRun} />
-          )}
+        <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-3">
+          Overview
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {statCards.map((c) => (
+            <div key={c.label} className={`bg-card border border-border border-l-2 ${c.accent} rounded-sm p-3`}>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-sans mb-2">
+                {c.label}
+              </div>
+              <div className="text-2xl font-bold font-mono text-foreground">{c.value}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {selectedTask && !selectedRun && (
-        <div className="border border-border rounded-sm p-8 text-center">
-          <div className="text-muted-foreground text-sm font-sans">
-            Select a run to view metrics and episodes
-          </div>
-          <div className="text-muted-foreground/50 text-xs mt-2 font-mono">
-            {runs.length} run(s) available
-          </div>
+      {/* Task cards */}
+      <div>
+        <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-3">
+          Tasks
         </div>
-      )}
-
-      {selectedRun && !currentRun && <MetricsSkeleton />}
-
-      {currentRun && (
-        <div className="border border-border rounded-sm p-4 space-y-4">
-          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Run Summary</div>
-          <MetricsPanel summary={currentRun.summary} />
-          {runs.length > 1 && <MetricsChart runs={runs} />}
+        <div className="space-y-2">
+          {data.tasks.map((task) => (
+            <Link
+              key={task.name}
+              href={`/task/${encodeURIComponent(task.name)}`}
+              className="block border border-border rounded-sm p-4 hover:bg-[#252535] transition-colors"
+            >
+              <div className="font-mono text-sm text-foreground">{task.name}</div>
+              <div className="text-xs text-muted-foreground font-sans mt-1">
+                {task.runCount} run{task.runCount !== 1 ? "s" : ""}
+                {task.latestRun && (
+                  <>
+                    {" \u00b7 Latest: "}
+                    <span className="font-mono">{task.latestRun.model}</span>
+                    {task.latestRun.successRate !== null && (
+                      <>
+                        {" \u00b7 SR "}
+                        <span className="font-mono">
+                          {(task.latestRun.successRate * 100).toFixed(1)}%
+                        </span>
+                      </>
+                    )}
+                    {" \u00b7 "}
+                    {timeAgo(task.latestRun.date)}
+                  </>
+                )}
+              </div>
+            </Link>
+          ))}
         </div>
-      )}
+      </div>
 
-      {selectedRun && (
-        <div className="border border-border rounded-sm p-4 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">
-              {episodesLoading ? "Loading episodes..." : <>Episodes &middot; {filteredEpisodes.length} of {episodes.length}</>}
-            </div>
-            <div className="flex gap-3 items-center">
-              <EpisodeFilters
-                status={statusFilter} onStatusChange={setStatusFilter}
-                sortField={sortField} onSortFieldChange={setSortField}
-                sortDir={sortDir} onSortDirChange={setSortDir}
-              />
-              <ViewToggle mode={viewMode} onChange={setViewMode} />
-            </div>
-          </div>
-          {episodesLoading ? (
-            <EpisodesSkeleton />
-          ) : filteredEpisodes.length === 0 && episodes.length > 0 ? (
-            <div className="text-center py-12 border rounded-sm">
-              <Inbox className="size-8 text-muted-foreground/50 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">No episodes match the current filters.</p>
-            </div>
-          ) : viewMode === "list" ? (
-            <EpisodeList episodes={filteredEpisodes} task={selectedTask!} run={selectedRun} />
-          ) : (
-            <EpisodeCards episodes={filteredEpisodes} task={selectedTask!} run={selectedRun} />
-          )}
+      {/* Recent runs table */}
+      <div>
+        <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-3">
+          Recent Runs
         </div>
-      )}
+        <div className="border border-border rounded-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-[#1C1C28]">
+                <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Task</th>
+                <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Model</th>
+                <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">SR</th>
+                <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Episodes</th>
+                <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.recentRuns.map((run, idx) => (
+                <tr
+                  key={`${run.task}-${run.runId}`}
+                  className={`border-b border-border hover:bg-[#252535] transition-colors ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
+                >
+                  <td className="px-4 py-2">
+                    <Link
+                      href={`/task/${encodeURIComponent(run.task)}/${encodeURIComponent(run.runId)}`}
+                      className="font-mono text-primary hover:underline text-xs"
+                    >
+                      {run.task}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2 font-mono text-xs">{run.model}</td>
+                  <td className="px-4 py-2 text-right font-mono text-xs">
+                    {run.successRate !== null ? `${(run.successRate * 100).toFixed(1)}%` : "\u2014"}
+                  </td>
+                  <td className="px-4 py-2 text-right font-mono text-xs">
+                    {run.numEpisodes !== null ? run.numEpisodes : "\u2014"}
+                  </td>
+                  <td className="px-4 py-2 text-right text-xs text-muted-foreground">
+                    {timeAgo(run.date)}
+                  </td>
+                </tr>
+              ))}
+              {data.recentRuns.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                    No runs found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

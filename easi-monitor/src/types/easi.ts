@@ -125,3 +125,34 @@ export interface ReconstructedMessage {
   role: "system" | "user" | "assistant";
   content: string;
 }
+
+export interface OverviewData {
+  totalRuns: number;
+  totalTasks: number;
+  totalEpisodes: number;
+  avgSuccessRate: number;
+  tasks: OverviewTask[];
+  recentRuns: RecentRun[];
+}
+
+export interface OverviewTask {
+  name: string;
+  runCount: number;
+  latestRun: {
+    runId: string;
+    model: string;
+    date: string;
+    successRate: number | null;
+    hasSummary: boolean;
+  } | null;
+}
+
+export interface RecentRun {
+  task: string;
+  runId: string;
+  model: string;
+  date: string;
+  successRate: number | null;
+  numEpisodes: number | null;
+  hasSummary: boolean;
+}
