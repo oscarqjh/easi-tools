@@ -35,8 +35,6 @@ export default function EpisodePage() {
   const [speed, setSpeed] = useState(1);
   const [episodeInstruction, setEpisodeInstruction] = useState<string | undefined>(undefined);
   const [exporting, setExporting] = useState(false);
-  const [exportFps, setExportFps] = useState(5);
-  const [exportProgress, setExportProgress] = useState<{ current: number; total: number } | null>(null);
 
   useEffect(() => {
     fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
@@ -124,104 +122,37 @@ export default function EpisodePage() {
       <div className="flex items-center justify-between">
         <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} />
       </div>
-      <div className="flex items-center gap-3">
-        {/* FPS selector */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-mono">FPS</span>
-          <div className="flex gap-0.5">
-            {[3, 5, 10].map((f) => (
-              <button
-                key={f}
-                onClick={() => setExportFps(f)}
-                disabled={exporting}
-                className={`px-2 py-0.5 text-xs font-mono rounded-sm border transition-colors ${
-                  exportFps === f
-                    ? "border-primary text-primary bg-primary/10"
-                    : "border-border text-muted-foreground hover:bg-[#252535]"
-                } disabled:opacity-50`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* Export button */}
-        <button
-          disabled={exporting}
-          onClick={async () => {
-            setExporting(true);
-            setExportProgress(null);
-            try {
-              const params = new URLSearchParams({ task, run, ep, fps: String(exportFps), stream: "true" });
-              if (sourcePath) params.set("source", sourcePath);
-              const resp = await fetch(`/api/export-video?${params}`);
-              if (!resp.ok) {
-                const err = await resp.json();
-                alert(`Export failed: ${err.error}`);
-                return;
-              }
-              const reader = resp.body?.getReader();
-              if (!reader) throw new Error("No response body");
-              const decoder = new TextDecoder();
-              let fileId = "";
-              let filename = `${task}_${ep}.mp4`;
-              let buffer = "";
-
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split("\n\n");
-                buffer = lines.pop() ?? "";
-                for (const line of lines) {
-                  const match = line.match(/^data: (.+)$/);
-                  if (!match) continue;
-                  const event = JSON.parse(match[1]);
-                  if (event.type === "progress") {
-                    setExportProgress({ current: event.current, total: event.total });
-                  } else if (event.type === "done") {
-                    fileId = event.fileId;
-                    filename = event.filename;
-                  } else if (event.type === "error") {
-                    alert(`Export failed: ${event.message}`);
-                    return;
-                  }
-                }
-              }
-
-              if (fileId) {
-                // Download the file
-                const dlResp = await fetch("/api/export-video", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ fileId }),
-                });
-                if (!dlResp.ok) throw new Error("Failed to download");
-                const blob = await dlResp.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = filename;
-                a.click();
-                URL.revokeObjectURL(url);
-              }
-            } catch (e) {
-              alert(`Export error: ${e}`);
-            } finally {
-              setExporting(false);
-              setExportProgress(null);
+      <button
+        disabled={exporting}
+        onClick={async () => {
+          setExporting(true);
+          try {
+            const params = new URLSearchParams({ task, run, ep });
+            if (sourcePath) params.set("source", sourcePath);
+            const resp = await fetch(`/api/export-video?${params}`);
+            if (!resp.ok) {
+              const err = await resp.json();
+              alert(`Export failed: ${err.error}`);
+              return;
             }
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-muted-foreground"
-        >
-          {exporting ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
-          {exporting && exportProgress
-            ? `${exportProgress.current}/${exportProgress.total}`
-            : exporting
-              ? "Starting..."
-              : "Export Video"}
-        </button>
-      </div>
+            const blob = await resp.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${task}_${ep}.mp4`;
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch (e) {
+            alert(`Export error: ${e}`);
+          } finally {
+            setExporting(false);
+          }
+        }}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-muted-foreground"
+      >
+        {exporting ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
+        {exporting ? "Exporting..." : "Export Video"}
+      </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left column: frame + map side-by-side, shared controls below */}
