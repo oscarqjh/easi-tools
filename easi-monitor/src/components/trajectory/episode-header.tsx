@@ -19,6 +19,15 @@ export function EpisodeHeader({ task, run, ep, sourcePath, config: configProp, r
 
   const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
 
+  // Sync state when props change (parent fetches async, props arrive later)
+  useEffect(() => {
+    if (resultProp) setResult(resultProp);
+  }, [resultProp]);
+
+  useEffect(() => {
+    if (configProp) setConfig(configProp);
+  }, [configProp]);
+
   useEffect(() => {
     if (configProp !== undefined) return;
     fetch(`/api/run?task=${encodeURIComponent(task)}&run=${encodeURIComponent(run)}${sourceParam}`)
