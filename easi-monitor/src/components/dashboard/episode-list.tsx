@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Columns2 } from "lucide-react";
 import type { EpisodeInfo } from "@/types/easi";
 import { getEpisodeStatus } from "@/lib/episode-utils";
 
@@ -40,12 +42,13 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
             <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Instruction</th>
             <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Steps</th>
             <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Time</th>
+            <th className="px-2 py-2 w-8" />
           </tr>
         </thead>
         <tbody>
           {episodes.length === 0 ? (
             <tr>
-              <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+              <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                 No episodes match the current filters.
               </td>
             </tr>
@@ -71,6 +74,16 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
                   </td>
                   <td className="px-4 py-2 text-right font-mono">
                     {typeof time === "number" ? `${Math.round(time)}s` : "\u2014"}
+                  </td>
+                  <td className="px-2 py-2 text-center">
+                    <Link
+                      href={`/compare/${encodeURIComponent(task)}/${encodeURIComponent(ep.episodeDir)}?left=${encodeURIComponent(run)}${sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : ""}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center justify-center size-6 rounded-sm text-muted-foreground hover:text-foreground hover:bg-[#252535] transition-colors"
+                      title="Compare this episode across runs"
+                    >
+                      <Columns2 className="size-3.5" />
+                    </Link>
                   </td>
                 </tr>
               );
