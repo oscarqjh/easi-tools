@@ -1,5 +1,24 @@
 # easi-monitor Changelog
 
+## [0.7.0] - 2026-04-17
+
+### Added
+- Task-specific config in `monitor.yaml`: `tasks` section keyed by task name prefix (e.g., `lhpr_vln`)
+- `getTaskConfig()` helper resolves `maps_dir`/`datasets_dir` per-task instead of globally
+- Metrics panel now shows all numeric values from `summary.metrics` as additional cards
+- Dynamic timeline legend: only shows marker types that actually appear in the data
+
+### Fixed
+- Episode header success badge: falls back to `result.success` when `task_success` is absent (fixes wrong "Failed" badge for EB-Alfred and other tasks)
+- Overview max metric: falls back to first numeric value in `summary.metrics` when `success_rate` is absent
+- Map overlay passes `task` param to API for task-specific config resolution
+
+### Changed
+- Removed global `maps_dir` and `datasets_dir` from `MonitorConfig` — now per-task in `tasks` section
+- API routes `/api/map`, `/api/episode-meta`, `/api/export-video` resolve paths via task-specific config
+
+---
+
 ## [0.6.0] - 2026-04-17
 
 ### Added

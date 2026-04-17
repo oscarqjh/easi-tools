@@ -133,6 +133,17 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [ ] Switch to async fs.promises in API routes for better concurrency (deferred)
 - [ ] Replace hardcoded hex colors with CSS custom properties where possible (deferred)
 
+## Extensibility (Complete)
+- [x] Task-specific config: `monitor.yaml` tasks section keyed by prefix (maps_dir, datasets_dir per-task)
+- [x] Episode header success badge: falls back to `result.success` when `task_success` absent
+- [x] Metrics panel: auto-generates cards from `summary.metrics` for task-specific metrics
+- [x] Timeline legend: dynamic, only shows marker types present in data
+- [x] Overview fallback: uses first numeric from `summary.metrics` when `success_rate` absent
+- [x] Map overlay: passes task to API for task-specific config resolution
+- [ ] Add prompt builder reconstructions for EB-Alfred, EB-Navigation (deferred)
+- [ ] Fallback image lookup in export_video.py for non-LHVLN `rgb_path` conventions (deferred)
+- [ ] Simulator-type guard on map overlay (only enable for habitat_sim tasks) (deferred)
+
 ## Phase 5: Task Execution
 - [ ] Manual task start from UI (POST /api/task/start → spawns easi start subprocess)
 - [ ] Task status tracking (PID file, stdout tailing)
