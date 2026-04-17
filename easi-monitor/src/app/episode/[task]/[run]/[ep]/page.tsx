@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Home, ChevronRight, Download, Loader2 } from "lucide-react";
+import { Home, ChevronRight, Download, Loader2, Columns2 } from "lucide-react";
 import { useTrajectory, useEpisodeMeta } from "@/lib/hooks";
 import { FrameViewer } from "@/components/trajectory/frame-viewer";
 import { MapOverlay } from "@/components/trajectory/map-overlay";
@@ -137,6 +137,13 @@ export default function EpisodePage() {
         <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} config={config} result={episodeResult} />
       </div>
       <div className="flex items-center gap-3">
+        <Link
+          href={`/compare/${encodeURIComponent(task)}/${encodeURIComponent(ep)}?left=${encodeURIComponent(run)}${sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : ""}`}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-border rounded-sm hover:bg-[#252535] transition-colors text-muted-foreground"
+        >
+          <Columns2 className="size-3.5" />
+          Compare
+        </Link>
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-mono">FPS</span>
           <div className="flex gap-0.5">
