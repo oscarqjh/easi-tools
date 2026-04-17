@@ -3,8 +3,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Home, ChevronRight, Download, Loader2, Columns2 } from "lucide-react";
-import { useTrajectory, useEpisodeMeta } from "@/lib/hooks";
+import { Home, ChevronRight, Download, Loader2, Columns2, ChevronLeft as ArrowLeft, ChevronRight as ArrowRight2 } from "lucide-react";
+import { useTrajectory, useEpisodeMeta, useEpisodes } from "@/lib/hooks";
+import { useRouter } from "next/navigation";
 import { FrameViewer } from "@/components/trajectory/frame-viewer";
 import { MapOverlay } from "@/components/trajectory/map-overlay";
 import { TimelineMarkers } from "@/components/trajectory/timeline-markers";
@@ -17,6 +18,7 @@ import type { RunConfig, EpisodeResult } from "@/types/easi";
 export default function EpisodePage() {
   const params = useParams<{ task: string; run: string; ep: string }>();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const task = decodeURIComponent(params.task);
   const run = decodeURIComponent(params.run);
   const ep = decodeURIComponent(params.ep);
@@ -27,6 +29,16 @@ export default function EpisodePage() {
 
   const { trajectory, loading, error: trajectoryError } = useTrajectory(task, run, ep, sourcePath);
   const { meta: episodeMeta } = useEpisodeMeta(task, run, ep, sourcePath);
+
+  // Episode navigation
+  const { episodes: allEpisodes } = useEpisodes(task, run, sourcePath);
+  const currentEpIdx = allEpisodes.findIndex(e => e.episodeDir === ep);
+  const prevEp = currentEpIdx > 0 ? allEpisodes[currentEpIdx - 1] : null;
+  const nextEp = currentEpIdx < allEpisodes.length - 1 ? allEpisodes[currentEpIdx + 1] : null;
+
+  function navigateToEpisode(episodeDir: string) {
+    router.push(`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(episodeDir)}${sourceQuery}`);
+  }
   const sceneId = episodeMeta?.scene ? String(episodeMeta.scene) : null;
   const [currentStep, setCurrentStep] = useState(0);
   const [camera, setCamera] = useState("front");
@@ -132,6 +144,36 @@ export default function EpisodePage() {
         <ChevronRight className="size-3.5" />
         <span className="font-mono text-foreground">{ep}</span>
       </div>
+
+      {/* Episode navigation */}
+      {allEpisodes.length > 1 && (
+        <div className="flex items-center gap-2">
+          <button
+            disabled={!prevEp}
+            onClick={() => prevEp && navigateToEpisode(prevEp.episodeDir)}
+            className="px-1.5 py-1 border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-muted-foreground"
+          >
+            <ArrowLeft className="size-3.5" />
+          </button>
+          <select
+            value={ep}
+            onChange={(e) => navigateToEpisode(e.target.value)}
+            className="bg-card border border-border rounded-sm px-3 py-1.5 text-xs font-mono text-foreground"
+          >
+            {allEpisodes.map((e) => (
+              <option key={e.episodeDir} value={e.episodeDir}>{e.episodeId}</option>
+            ))}
+          </select>
+          <button
+            disabled={!nextEp}
+            onClick={() => nextEp && navigateToEpisode(nextEp.episodeDir)}
+            className="px-1.5 py-1 border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-muted-foreground"
+          >
+            <ArrowRight2 className="size-3.5" />
+          </button>
+          <span className="text-[10px] text-muted-foreground font-mono">{currentEpIdx + 1} / {allEpisodes.length}</span>
+        </div>
+      )}
 
       <div className="flex items-center justify-between">
         <EpisodeHeader task={task} run={run} ep={ep} sourcePath={sourcePath} config={config} result={episodeResult} />

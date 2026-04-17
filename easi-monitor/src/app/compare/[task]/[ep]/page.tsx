@@ -3,8 +3,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Home, ChevronRight } from "lucide-react";
-import { useRuns, useTrajectory, useEpisodeMeta } from "@/lib/hooks";
+import { Home, ChevronRight, ChevronLeft as ArrowLeft, ChevronRight as ArrowRight2 } from "lucide-react";
+import { useRuns, useTrajectory, useEpisodeMeta, useEpisodes } from "@/lib/hooks";
 import { FrameViewer } from "@/components/trajectory/frame-viewer";
 import { MapOverlay } from "@/components/trajectory/map-overlay";
 import { TimelineMarkers } from "@/components/trajectory/timeline-markers";
@@ -29,6 +29,20 @@ export default function ComparePage() {
 
   // Fetch available runs for the dropdowns
   const { runs } = useRuns(task, sourcePath);
+
+  // Episode navigation (use left run or right run for episode list)
+  const { episodes: allEpisodes } = useEpisodes(task, leftRunId ?? rightRunId, sourcePath);
+  const currentEpIdx = allEpisodes.findIndex(e => e.episodeDir === ep);
+  const prevEp = currentEpIdx > 0 ? allEpisodes[currentEpIdx - 1] : null;
+  const nextEp = currentEpIdx < allEpisodes.length - 1 ? allEpisodes[currentEpIdx + 1] : null;
+
+  function navigateToEpisode(episodeDir: string) {
+    const params = new URLSearchParams();
+    if (leftRunId) params.set("left", leftRunId);
+    if (rightRunId) params.set("right", rightRunId);
+    if (sourcePath) params.set("source", sourcePath);
+    router.push(`/compare/${encodeURIComponent(task)}/${encodeURIComponent(episodeDir)}?${params.toString()}`);
+  }
 
   // Fetch trajectories for both sides
   const { trajectory: leftTraj } = useTrajectory(
@@ -169,6 +183,36 @@ export default function ComparePage() {
         <ChevronRight className="size-3.5" />
         <span className="text-foreground font-mono">Compare: {ep}</span>
       </div>
+
+      {/* Episode navigation */}
+      {allEpisodes.length > 1 && (
+        <div className="flex items-center gap-2">
+          <button
+            disabled={!prevEp}
+            onClick={() => prevEp && navigateToEpisode(prevEp.episodeDir)}
+            className="px-1.5 py-1 border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-muted-foreground"
+          >
+            <ArrowLeft className="size-3.5" />
+          </button>
+          <select
+            value={ep}
+            onChange={(e) => navigateToEpisode(e.target.value)}
+            className="bg-card border border-border rounded-sm px-3 py-1.5 text-xs font-mono text-foreground"
+          >
+            {allEpisodes.map((e) => (
+              <option key={e.episodeDir} value={e.episodeDir}>{e.episodeId}</option>
+            ))}
+          </select>
+          <button
+            disabled={!nextEp}
+            onClick={() => nextEp && navigateToEpisode(nextEp.episodeDir)}
+            className="px-1.5 py-1 border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-muted-foreground"
+          >
+            <ArrowRight2 className="size-3.5" />
+          </button>
+          <span className="text-[10px] text-muted-foreground font-mono">{currentEpIdx + 1} / {allEpisodes.length}</span>
+        </div>
+      )}
 
       {/* Episode info */}
       {instruction && (
