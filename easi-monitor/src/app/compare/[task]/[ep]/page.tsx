@@ -55,6 +55,21 @@ export default function ComparePage() {
     ? String(episodeMeta.meta.scene)
     : null;
 
+  // Fetch episode instruction (same episode, use whichever run is available)
+  const [instruction, setInstruction] = useState<string | null>(null);
+
+  useEffect(() => {
+    const runId = leftRunId ?? rightRunId;
+    if (!runId) return;
+    fetch(`/api/episodes?task=${encodeURIComponent(task)}&run=${encodeURIComponent(runId)}${sourceQuery}`)
+      .then(r => r.json())
+      .then((eps: Array<{ episodeDir: string; result: { instruction?: string } | null }>) => {
+        const found = eps.find(e => e.episodeDir === ep);
+        if (found?.result?.instruction) setInstruction(found.result.instruction as string);
+      })
+      .catch(console.error);
+  }, [task, leftRunId, rightRunId, ep, sourceQuery]);
+
   // Fetch configs for both runs
   const [leftConfig, setLeftConfig] = useState<RunConfig | null>(null);
   const [rightConfig, setRightConfig] = useState<RunConfig | null>(null);
@@ -154,6 +169,18 @@ export default function ComparePage() {
         <ChevronRight className="size-3.5" />
         <span className="text-foreground font-mono">Compare: {ep}</span>
       </div>
+
+      {/* Episode info */}
+      {instruction && (
+        <div className="border border-border rounded-sm p-4 space-y-2">
+          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Episode</div>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-sm font-bold text-primary">{ep}</span>
+            {sceneId && <span className="text-[10px] text-muted-foreground font-mono bg-[#1C1C28] px-1.5 py-0.5 rounded-sm">{sceneId}</span>}
+          </div>
+          <p className="text-sm leading-relaxed font-sans">{instruction}</p>
+        </div>
+      )}
 
       {/* Run selectors */}
       <div className="grid grid-cols-2 gap-4">
@@ -284,13 +311,23 @@ export default function ComparePage() {
         </div>
       </div>
 
-      {/* Shared controls */}
-      <TimelineMarkers
-        trajectory={
-          leftTraj.length >= rightTraj.length ? leftTraj : rightTraj
-        }
-        onStepClick={handleStepChange}
-      />
+      {/* Timeline markers for both runs */}
+      {leftTraj.length > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground w-10 shrink-0">Left</span>
+          <div className="flex-1">
+            <TimelineMarkers trajectory={leftTraj} onStepClick={handleStepChange} />
+          </div>
+        </div>
+      )}
+      {rightTraj.length > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground w-10 shrink-0">Right</span>
+          <div className="flex-1">
+            <TimelineMarkers trajectory={rightTraj} onStepClick={handleStepChange} />
+          </div>
+        </div>
+      )}
       <PlaybackControls
         currentStep={currentStep}
         maxStep={maxStep}
