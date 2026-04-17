@@ -7,10 +7,14 @@ export interface Source {
   path: string;
 }
 
+export interface TaskSpecificConfig {
+  maps_dir?: string;
+  datasets_dir?: string;
+}
+
 export interface MonitorConfig {
   sources: Source[];
-  maps_dir: string | null;
-  datasets_dir: string | null;
+  tasks: Record<string, TaskSpecificConfig>;
 }
 
 const CONFIG_PATHS = [
@@ -32,11 +36,21 @@ export function loadConfig(): MonitorConfig {
               path: String(s.path ?? ""),
             }))
             .filter((s) => s.path !== "");
-          if (sources.length > 0) return {
-            sources,
-            maps_dir: typeof raw.maps_dir === "string" ? raw.maps_dir : null,
-            datasets_dir: typeof raw.datasets_dir === "string" ? raw.datasets_dir : null,
-          };
+
+          const tasks: Record<string, TaskSpecificConfig> = {};
+          if (raw.tasks && typeof raw.tasks === "object" && !Array.isArray(raw.tasks)) {
+            for (const [key, val] of Object.entries(raw.tasks as Record<string, unknown>)) {
+              if (val && typeof val === "object" && !Array.isArray(val)) {
+                const v = val as Record<string, unknown>;
+                const entry: TaskSpecificConfig = {};
+                if (typeof v.maps_dir === "string") entry.maps_dir = v.maps_dir;
+                if (typeof v.datasets_dir === "string") entry.datasets_dir = v.datasets_dir;
+                tasks[key] = entry;
+              }
+            }
+          }
+
+          if (sources.length > 0) return { sources, tasks };
         }
       } catch { /* fall through */ }
     }
@@ -47,15 +61,21 @@ export function loadConfig(): MonitorConfig {
   if (envDir) {
     return {
       sources: [{ name: "Default", path: envDir }],
-      maps_dir: null,
-      datasets_dir: null,
+      tasks: {},
     };
   }
 
   // Final fallback
   return {
     sources: [{ name: "Local", path: path.resolve(process.cwd(), "..", "logs") }],
-    maps_dir: null,
-    datasets_dir: null,
+    tasks: {},
   };
+}
+
+/** Find task-specific config by matching task name against prefix keys. */
+export function getTaskConfig(config: MonitorConfig, taskName: string): TaskSpecificConfig | null {
+  for (const [prefix, cfg] of Object.entries(config.tasks)) {
+    if (taskName.startsWith(prefix)) return cfg;
+  }
+  return null;
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { loadConfig } from "@/lib/config";
+import { loadConfig, getTaskConfig } from "@/lib/config";
 import { validateSource, sanitizeSegment } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
@@ -28,8 +28,9 @@ export async function GET(request: NextRequest) {
   }
 
   const config = loadConfig();
-  if (!config.datasets_dir) {
-    return NextResponse.json({ error: "datasets_dir not configured" }, { status: 500 });
+  const taskConfig = getTaskConfig(config, safeTask);
+  if (!taskConfig?.datasets_dir) {
+    return NextResponse.json({ error: "datasets_dir not configured for this task" }, { status: 404 });
   }
 
   // Read run config to get dataset info
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
 
   // Convert repo_id to directory name (oscarqjh/LHPR-VLN_easi -> oscarqjh_LHPR-VLN_easi)
   const repoDir = repoId.replace("/", "_");
-  const jsonlPath = path.join(config.datasets_dir, repoDir, "data", `${split}.jsonl`);
+  const jsonlPath = path.join(taskConfig.datasets_dir, repoDir, "data", `${split}.jsonl`);
 
   if (!fs.existsSync(jsonlPath)) {
     return NextResponse.json({ error: `dataset not found: ${jsonlPath}` }, { status: 404 });

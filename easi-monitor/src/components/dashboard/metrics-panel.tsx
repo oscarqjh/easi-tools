@@ -65,6 +65,20 @@ export function MetricsPanel({ summary }: Props) {
     });
   }
 
+  // Add task-specific metrics from summary.metrics
+  const shownKeys = new Set(["num_episodes", "success_rate", "avg_steps", "median_steps"]);
+  for (const [key, val] of Object.entries(summary.metrics ?? {})) {
+    if (typeof val === "number" && !shownKeys.has(key)) {
+      cards.push({
+        label: key.replace(/_/g, " "),
+        value: typeof val === "number" && val < 1 && val > 0
+          ? `${(val * 100).toFixed(1)}%`
+          : String(Math.round(val * 1000) / 1000),
+        accentColor: "border-l-[#64748B]",
+      });
+    }
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       {cards.map((c) => (

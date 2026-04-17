@@ -64,6 +64,13 @@ export async function GET() {
           if (sr !== null && sr > srMax) {
             srMax = sr;
           }
+          // Fallback: check summary.metrics for a primary metric
+          if (sr === null && run.summary?.metrics) {
+            const firstMetric = Object.values(run.summary.metrics).find(v => typeof v === "number") as number | undefined;
+            if (firstMetric !== undefined && firstMetric > srMax) {
+              srMax = firstMetric;
+            }
+          }
 
           allRuns.push({
             task: taskInfo.name,

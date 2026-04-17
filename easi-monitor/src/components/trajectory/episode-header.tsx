@@ -40,7 +40,7 @@ export function EpisodeHeader({ task, run, ep, sourcePath, config: configProp, r
 
   if (!result) return null;
 
-  const success = (result.task_success ?? 0) as number;
+  const success = (result.task_success ?? result.success ?? 0) as number;
 
   return (
     <div className="border rounded-sm p-4 space-y-3">

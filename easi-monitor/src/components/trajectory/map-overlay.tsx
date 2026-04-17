@@ -5,6 +5,7 @@ import type { TrajectoryStep, MapMeta, RenderParams } from "@/types/easi";
 
 interface Props {
   sceneId: string;
+  task?: string;
   trajectory: TrajectoryStep[];
   currentStep: number;
   onStepClick: (step: number) => void;
@@ -28,7 +29,7 @@ function getFloor(agentY: number, floorHeights: number[]): number {
   return floor;
 }
 
-export function MapOverlay({ sceneId, trajectory, currentStep, onStepClick }: Props) {
+export function MapOverlay({ sceneId, task, trajectory, currentStep, onStepClick }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [meta, setMeta] = useState<MapMeta | null>(null);
@@ -42,7 +43,8 @@ export function MapOverlay({ sceneId, trajectory, currentStep, onStepClick }: Pr
     if (!sceneId) return;
     setMeta(null);
     setImgLoaded(false);
-    fetch(`/api/map?scene=${encodeURIComponent(sceneId)}&meta=true`)
+    const taskParam = task ? `&task=${encodeURIComponent(task)}` : "";
+    fetch(`/api/map?scene=${encodeURIComponent(sceneId)}&meta=true${taskParam}`)
       .then((r) => {
         if (!r.ok) return null;
         return r.json();
@@ -53,7 +55,7 @@ export function MapOverlay({ sceneId, trajectory, currentStep, onStepClick }: Pr
         }
       })
       .catch(console.error);
-  }, [sceneId]);
+  }, [sceneId, task]);
 
   // Determine floor from current step's agent_pose
   useEffect(() => {
@@ -67,7 +69,8 @@ export function MapOverlay({ sceneId, trajectory, currentStep, onStepClick }: Pr
   // Update map URL when floor changes
   useEffect(() => {
     if (!sceneId) return;
-    const url = `/api/map?scene=${encodeURIComponent(sceneId)}&floor=${currentFloor}`;
+    const taskQ = task ? `&task=${encodeURIComponent(task)}` : "";
+    const url = `/api/map?scene=${encodeURIComponent(sceneId)}&floor=${currentFloor}${taskQ}`;
     setMapUrl(url);
     setImgLoaded(false);
   }, [sceneId, currentFloor]);

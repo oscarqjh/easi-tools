@@ -3,7 +3,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { loadConfig } from "@/lib/config";
+import { loadConfig, getTaskConfig } from "@/lib/config";
 import { validateSource, sanitizeSegment } from "@/lib/security";
 
 function findPython(scriptDir: string): string {
@@ -20,7 +20,7 @@ function findPython(scriptDir: string): string {
   return "python3";
 }
 
-function buildArgs(config: ReturnType<typeof loadConfig>, runDir: string, ep: string, outputPath: string, fps: string) {
+function buildArgs(runDir: string, ep: string, outputPath: string, fps: string, taskConfig: { maps_dir?: string; datasets_dir?: string } | null) {
   const args = [
     "-m", "autoeval.export_video",
     "--run-dir", runDir,
@@ -28,8 +28,8 @@ function buildArgs(config: ReturnType<typeof loadConfig>, runDir: string, ep: st
     "--output", outputPath,
     "--fps", fps,
   ];
-  if (config.maps_dir) args.push("--maps-dir", config.maps_dir);
-  if (config.datasets_dir) args.push("--datasets-dir", config.datasets_dir);
+  if (taskConfig?.maps_dir) args.push("--maps-dir", taskConfig.maps_dir);
+  if (taskConfig?.datasets_dir) args.push("--datasets-dir", taskConfig.datasets_dir);
   return args;
 }
 
@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
   }
 
   const config = loadConfig();
+  const taskConfig = getTaskConfig(config, safeTask);
   const runDir = path.join(logsDir, safeTask, safeRun);
 
   if (!fs.existsSync(path.join(runDir, "config.json"))) {
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
   const outputPath = path.join(os.tmpdir(), `easi_export_${safeTask}_${safeEp}_${Date.now()}.mp4`);
   const scriptDir = path.resolve(process.cwd(), "..");
   const python = findPython(scriptDir);
-  const args = buildArgs(config, runDir, safeEp, outputPath, fps);
+  const args = buildArgs(runDir, safeEp, outputPath, fps, taskConfig);
 
   if (stream) {
     // SSE mode: stream progress, then signal completion with fileId

@@ -55,11 +55,24 @@ export function TimelineMarkers({ trajectory, onStepClick }: Props) {
             </Tooltip>
           ))}
         </div>
-        <div className="flex gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#F87171] inline-block" /> Fallback</span>
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#34D399] inline-block" /> Subtask</span>
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#60A5FA] inline-block" /> End</span>
-        </div>
+        {(() => {
+          const usedTypes = new Set(markers.map(m => m.type));
+          const legendItems = [
+            { type: "fallback", color: "bg-[#F87171]", label: "Fallback" },
+            { type: "subtask", color: "bg-[#34D399]", label: "Subtask" },
+            { type: "done", color: "bg-[#60A5FA]", label: "End" },
+          ].filter(item => usedTypes.has(item.type as Marker["type"]));
+          return (
+            <div className="flex gap-4 text-xs text-muted-foreground">
+              {legendItems.map(item => (
+                <span key={item.type} className="flex items-center gap-1">
+                  <span className={`w-2.5 h-2.5 rounded-sm ${item.color} inline-block`} />
+                  {item.label}
+                </span>
+              ))}
+            </div>
+          );
+        })()}
       </div>
     </TooltipProvider>
   );

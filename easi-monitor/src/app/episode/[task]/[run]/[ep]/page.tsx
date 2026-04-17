@@ -250,6 +250,7 @@ export default function EpisodePage() {
             {sceneId && (
               <MapOverlay
                 sceneId={sceneId}
+                task={task}
                 trajectory={trajectory}
                 currentStep={currentStep}
                 onStepClick={handleStepChange}

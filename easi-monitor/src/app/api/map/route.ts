@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { loadConfig } from "@/lib/config";
+import { loadConfig, getTaskConfig } from "@/lib/config";
 import { sanitizeSegment } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
   const scene = request.nextUrl.searchParams.get("scene");
   const floor = request.nextUrl.searchParams.get("floor");
   const meta = request.nextUrl.searchParams.get("meta");
+  const task = request.nextUrl.searchParams.get("task");
 
   if (!scene) return NextResponse.json({ error: "scene required" }, { status: 400 });
 
@@ -19,9 +20,11 @@ export async function GET(request: NextRequest) {
   }
 
   const config = loadConfig();
-  if (!config.maps_dir) return NextResponse.json({ error: "maps_dir not configured" }, { status: 500 });
+  const taskConfig = task ? getTaskConfig(config, task) : null;
+  const mapsDir = taskConfig?.maps_dir;
+  if (!mapsDir) return NextResponse.json({ error: "maps_dir not configured for this task" }, { status: 404 });
 
-  const sceneDir = path.join(config.maps_dir, safeScene);
+  const sceneDir = path.join(mapsDir, safeScene);
   if (!fs.existsSync(sceneDir)) return NextResponse.json({ error: "scene not found" }, { status: 404 });
 
   if (meta === "true") {
