@@ -5,7 +5,8 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useRuns } from "@/lib/hooks";
 import { timeAgo } from "@/lib/episode-utils";
 import { MetricsChart } from "@/components/dashboard/metrics-chart";
-import { Home, ChevronRight } from "lucide-react";
+import { Home, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
+import { useState } from "react";
 
 function RunsSkeleton() {
   return (
@@ -37,6 +38,31 @@ export default function TaskDetailPage() {
   const { runs, loading, error } = useRuns(taskName, sourcePath);
 
   const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
+
+  type SortField = "date" | "sr";
+  type SortDir = "asc" | "desc";
+  const [sortField, setSortField] = useState<SortField>("date");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  function toggleSort(field: SortField) {
+    if (sortField === field) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDir("desc");
+    }
+  }
+
+  const sortedRuns = [...runs].sort((a, b) => {
+    const dir = sortDir === "asc" ? 1 : -1;
+    if (sortField === "sr") {
+      const srA = a.summary?.success_rate ?? -1;
+      const srB = b.summary?.success_rate ?? -1;
+      return dir * (srA - srB);
+    }
+    // date (default)
+    return dir * a.date.localeCompare(b.date);
+  });
 
   return (
     <div className="space-y-6">
@@ -81,22 +107,26 @@ export default function TaskDetailPage() {
                 <thead>
                   <tr className="border-b bg-[#1C1C28]">
                     <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Model</th>
-                    <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Date</th>
-                    <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">SR</th>
+                    <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground select-none" onClick={() => toggleSort("date")}>
+                      <span className="inline-flex items-center gap-1">Date {sortField === "date" && (sortDir === "asc" ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />)}</span>
+                    </th>
+                    <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground select-none" onClick={() => toggleSort("sr")}>
+                      <span className="inline-flex items-center gap-1 justify-end">SR {sortField === "sr" && (sortDir === "asc" ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />)}</span>
+                    </th>
                     <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Avg Steps</th>
                     <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Episodes</th>
                     <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {runs.length === 0 ? (
+                  {sortedRuns.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                         No runs found.
                       </td>
                     </tr>
                   ) : (
-                    runs.map((run, idx) => {
+                    sortedRuns.map((run, idx) => {
                       const sr = typeof run.summary?.success_rate === "number"
                         ? `${(run.summary.success_rate * 100).toFixed(1)}%`
                         : "\u2014";
