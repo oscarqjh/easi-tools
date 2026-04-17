@@ -88,6 +88,11 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - agent_pose in EASI trajectory.jsonl: `[x, y, z, rx, ry, rz]` — same coordinate system as map generation (confirmed via bridge.py:263-268, position comes directly from habitat_sim agent)
 - Rotation in agent_pose is currently `[0,0,0]` (hardcoded in bridge.py) — agent_rotation quaternion is available in sim_info metadata but not exposed yet. Direction arrow may need bridge.py update to include rotation.
 
+## Analysis Features (Complete)
+- [x] Group episodes by Scene or Robot on run detail page
+- [x] Dataset episodes API for scene/robot metadata enrichment
+- [x] Sortable Date and SR columns on task detail runs table
+
 ## Phase 3b: Comparison and Analytics
 - [ ] Side-by-side episode comparison (two trajectory viewers)
 - [ ] Aggregate analytics dashboard (token usage trends, timing breakdowns)

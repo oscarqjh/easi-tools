@@ -1,5 +1,19 @@
 # easi-monitor Changelog
 
+## [0.8.0] - 2026-04-17
+
+### Added
+- Group episodes by Scene or Robot on run detail page (Group toggle: None/Scene/Robot)
+- Dataset episodes API (`/api/dataset-episodes`) for fetching scene/robot metadata per episode
+- `useDatasetEpisodes` hook for client-side dataset metadata enrichment
+- Sortable Date and SR columns on task detail runs table (click header to sort, arrow indicator)
+- Per-scene group headers showing episode count and success count
+
+### Fixed
+- EpisodeHeader now syncs with async prop updates (was blank when parent fetched data late)
+
+---
+
 ## [0.7.0] - 2026-04-17
 
 ### Added
