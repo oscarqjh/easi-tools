@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEpisodes } from "@/lib/hooks";
+import { useEpisodes, useDatasetEpisodes } from "@/lib/hooks";
 import { MetricsPanel } from "@/components/dashboard/metrics-panel";
 import { EpisodeList } from "@/components/dashboard/episode-list";
 import { EpisodeCards } from "@/components/dashboard/episode-cards";
@@ -13,7 +13,7 @@ import {
 } from "@/components/dashboard/episode-filters";
 import { getEpisodeStatus, formatRunLabel } from "@/lib/episode-utils";
 import { Home, ChevronRight, Inbox } from "lucide-react";
-import type { RunSummary, RunConfig } from "@/types/easi";
+import type { RunSummary, RunConfig, EpisodeInfo } from "@/types/easi";
 
 function MetricsSkeleton() {
   return (
@@ -58,6 +58,7 @@ export default function RunDetailPage() {
   const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
 
   const { episodes, loading: episodesLoading, error: episodesError } = useEpisodes(taskName, runId, sourcePath);
+  const { episodes: datasetEpisodes } = useDatasetEpisodes(taskName, runId, sourcePath);
 
   const [summary, setSummary] = useState<RunSummary | null>(null);
   const [config, setConfig] = useState<RunConfig | null>(null);
@@ -67,6 +68,7 @@ export default function RunDetailPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortField, setSortField] = useState<SortField>("episode");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [groupBy, setGroupBy] = useState<"none" | "scene" | "robot">("none");
 
   useEffect(() => {
     fetch(`/api/run?task=${encodeURIComponent(taskName)}&run=${encodeURIComponent(runId)}${sourceParam}`)
@@ -80,6 +82,26 @@ export default function RunDetailPage() {
   }, [taskName, runId, sourceParam]);
 
   const runLabel = formatRunLabel(runId, config?.cli_options?.model);
+
+  // Map episode index (from dir name like "024_ep_24" -> 24) to dataset metadata
+  const datasetMap = new Map<number, Record<string, unknown>>();
+  for (const de of datasetEpisodes) {
+    if (typeof de.index === "number") datasetMap.set(de.index, de);
+  }
+
+  function getEpisodeIndex(episodeDir: string): number {
+    const match = episodeDir.match(/^(\d+)_/);
+    return match ? parseInt(match[1], 10) : -1;
+  }
+
+  function getGroupKey(ep: EpisodeInfo): string {
+    const idx = getEpisodeIndex(ep.episodeDir);
+    const meta = datasetMap.get(idx);
+    if (!meta) return "Unknown";
+    if (groupBy === "scene") return (meta.scene as string) ?? "Unknown";
+    if (groupBy === "robot") return (meta.robot as string) ?? "Unknown";
+    return "Unknown";
+  }
 
   const filteredEpisodes = episodes
     .filter((ep) => statusFilter === "all" || getEpisodeStatus(ep) === statusFilter)
@@ -99,6 +121,18 @@ export default function RunDetailPage() {
           return dir * a.episodeDir.localeCompare(b.episodeDir);
       }
     });
+
+  // Group episodes
+  const groupedEpisodes: Map<string, typeof filteredEpisodes> = new Map();
+  if (groupBy === "none") {
+    groupedEpisodes.set("all", filteredEpisodes);
+  } else {
+    for (const ep of filteredEpisodes) {
+      const key = getGroupKey(ep);
+      if (!groupedEpisodes.has(key)) groupedEpisodes.set(key, []);
+      groupedEpisodes.get(key)!.push(ep);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -136,6 +170,24 @@ export default function RunDetailPage() {
               sortField={sortField} onSortFieldChange={setSortField}
               sortDir={sortDir} onSortDirChange={setSortDir}
             />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-mono">Group</span>
+              <div className="flex gap-0.5">
+                {(["none", "scene", "robot"] as const).map((g) => (
+                  <button
+                    key={g}
+                    onClick={() => setGroupBy(g)}
+                    className={`px-2 py-0.5 text-xs font-mono rounded-sm border transition-colors ${
+                      groupBy === g
+                        ? "border-primary text-primary bg-primary/10"
+                        : "border-border text-muted-foreground hover:bg-[#252535]"
+                    }`}
+                  >
+                    {g === "none" ? "None" : g.charAt(0).toUpperCase() + g.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
             <ViewToggle mode={viewMode} onChange={setViewMode} />
           </div>
         </div>
@@ -150,10 +202,24 @@ export default function RunDetailPage() {
             <Inbox className="size-8 text-muted-foreground/50 mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">No episodes match the current filters.</p>
           </div>
-        ) : viewMode === "list" ? (
-          <EpisodeList episodes={filteredEpisodes} task={taskName} run={runId} sourcePath={sourcePath} />
         ) : (
-          <EpisodeCards episodes={filteredEpisodes} task={taskName} run={runId} sourcePath={sourcePath} />
+          Array.from(groupedEpisodes.entries()).map(([groupKey, groupEps]) => (
+            <div key={groupKey}>
+              {groupBy !== "none" && (
+                <div className="flex items-center gap-2 mb-2 mt-4">
+                  <span className="text-xs font-mono text-primary">{groupKey}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    ({groupEps.length} episodes, {groupEps.filter(e => getEpisodeStatus(e) === "success").length} success)
+                  </span>
+                </div>
+              )}
+              {viewMode === "list" ? (
+                <EpisodeList episodes={groupEps} task={taskName} run={runId} sourcePath={sourcePath} />
+              ) : (
+                <EpisodeCards episodes={groupEps} task={taskName} run={runId} sourcePath={sourcePath} />
+              )}
+            </div>
+          ))
         )}
       </div>
     </div>

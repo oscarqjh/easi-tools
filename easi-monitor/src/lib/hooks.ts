@@ -81,6 +81,27 @@ export function useEpisodes(task: string | null, run: string | null, sourcePath:
   return { episodes, loading, error };
 }
 
+export function useDatasetEpisodes(task: string | null, run: string | null, sourcePath: string | null) {
+  const [episodes, setEpisodes] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!task || !run) { setEpisodes([]); return; }
+    setLoading(true);
+    const params = new URLSearchParams({ task, run });
+    if (sourcePath) params.set("source", sourcePath);
+    fetch(`/api/dataset-episodes?${params}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(setEpisodes)
+      .catch((e) => setError(e instanceof Error ? e.message : "Unknown error"))
+      .finally(() => setLoading(false));
+  }, [task, run, sourcePath]);
+  return { episodes, loading, error };
+}
+
 export function useEpisodeMeta(task: string | null, run: string | null, ep: string | null, sourcePath: string | null) {
   const [meta, setMeta] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
