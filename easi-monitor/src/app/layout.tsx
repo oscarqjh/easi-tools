@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { ExportProvider } from "@/components/export-queue/export-context";
+import { ExportPanel } from "@/components/export-queue/export-panel";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,7 +34,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </Link>
             </div>
           </header>
-          <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
+          <ExportProvider>
+            <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
+            <ExportPanel />
+          </ExportProvider>
         </div>
       </body>
     </html>
