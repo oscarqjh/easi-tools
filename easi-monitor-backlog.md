@@ -93,10 +93,14 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [x] Dataset episodes API for scene/robot metadata enrichment
 - [x] Sortable Date and SR columns on task detail runs table
 
-## Phase 3b: Comparison and Analytics
-- [ ] Side-by-side episode comparison (two trajectory viewers)
+## Phase 3b: Comparison and Analytics (Partial)
+- [x] Side-by-side episode comparison page (same episode, different runs)
+- [x] Compare entry points: episode list icon + episode viewer button
+- [x] Dual timeline markers on compare page (Left/Right labeled)
+- [x] Episode navigator: dropdown + prev/next on viewer and compare pages
+- [x] Global export job queue with floating panel, auto-download, cross-page persistence
 - [ ] Aggregate analytics dashboard (token usage trends, timing breakdowns)
-- [ ] Run diff view (compare metrics between two runs)
+- [ ] Run diff view (compare metrics/outcomes between two runs as a table)
 
 ## Phase 4: Multi-Source and Configuration (Complete)
 - [x] monitor.yaml config file with named sources

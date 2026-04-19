@@ -1,5 +1,24 @@
 # easi-monitor Changelog
 
+## [0.9.0] - 2026-04-19
+
+### Added
+- Side-by-side episode comparison page (`/compare/[task]/[ep]?left=RUN&right=RUN`)
+- Compare page: shared scrubber syncs both sides, two full metadata panels, episode header with instruction
+- Compare page: dual timeline markers (one row per run, labeled Left/Right)
+- Compare entry points: icon on episode list rows + "Compare" button on episode viewer
+- Episode navigator: dropdown + prev/next arrows on both viewer and compare pages (e.g., "◀ [ep_23 ▼] ▶ 24/55")
+- Global export job queue: floating bottom-right panel tracks exports across page navigation
+- Export panel: progress bars, download/retry/dismiss per job, minimizable
+- Auto-download when export finishes and user is still on the same episode page
+- Manual download via panel when user navigated away
+
+### Changed
+- Export logic moved from episode page local state to React context (`ExportProvider` in layout)
+- Episode page export button now uses global queue instead of inline SSE handling
+
+---
+
 ## [0.8.0] - 2026-04-17
 
 ### Added
