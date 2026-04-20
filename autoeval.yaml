@@ -3,26 +3,38 @@
 
 # Directories to scan for checkpoint-* subdirectories
 target_dirs:
-  - /mnt/aigc/users/yinwanqi/00-storage/InternVL/LHVLN_DFS
+  - /mnt/umm/users/yinwanqi/00-storage/InternVL/260414_LHVLN_DFS_wo_NST
+  - /mnt/umm/users/yinwanqi/00-storage/InternVL/260414_LHVLN_DFS_NST
+# later change to /mnt/umm/users/yinwanqi/00-storage/InternVL/260414_LHVLN_DFS_wo_NST
+# later change to /mnt/umm/users/yinwanqi/00-storage/InternVL/260414_LHVLN_DFS_NST
 
 # Output and results
-output_dir: ./logs
-results_dir: null          # null = don't move results
+output_dir: ./autoeval_logs_new
+results_dir: /mnt/umm/users/qianjianheng/workspace/eval_results_easi          # null = don't move results
 scan_interval: 600         # seconds between scans when idle
 zip_images: false          # zip PNGs per episode when moving
 zip_all_images: false      # zip ALL PNGs into one file when moving
 
+# Optional: only process specific checkpoints.
+# Accepts names ("checkpoint-1000") and/or step numbers (1000).
+# Omit / set to null to process every discovered checkpoint.
+# checkpoint_filter:
+#   - checkpoint-8000
+#   - checkpoint-6500
+
 # easi start options
 tasks:
-  - lhpr_vln_unseen_val_filtered_sft
+  - lhpr_vln_unseen_val_filtered_sft_mirror
+  # - lhpr_vln_unseen_val_filtered_sft
 agent: react
 backend: vllm
-num_parallel: 8
+num_parallel: 12
 sim_gpus: "0,1"
-llm_instances: 1
-llm_gpus: "2,3"
+llm_instances: 3
+llm_gpus: "2,3,4,5,6,7"
 llm_kwargs:
   tensor_parallel_size: 2
   trust_remote_code: true
-  startup_timeout: 600
-verbosity: TRACE
+  startup_timeout: 900
+  skip_special_tokens: false
+verbosity: INFO
