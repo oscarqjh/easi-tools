@@ -47,20 +47,47 @@ export async function GET(request: NextRequest) {
 
   const repoDir = repoId.replace("/", "_");
   const jsonlPath = path.join(taskConfig.datasets_dir, repoDir, "data", `${split}.jsonl`);
-  if (!fs.existsSync(jsonlPath)) {
-    return NextResponse.json({ error: "dataset not found" }, { status: 404 });
+
+  if (fs.existsSync(jsonlPath)) {
+    // Parse all lines into an array indexed by episode number
+    const lines = fs.readFileSync(jsonlPath, "utf-8").trim().split("\n");
+    const episodes = lines.map((line, idx) => {
+      try {
+        const data = JSON.parse(line);
+        return { index: idx, ...data };
+      } catch {
+        return { index: idx };
+      }
+    });
+    return NextResponse.json(episodes);
   }
 
-  // Parse all lines into an array indexed by episode number
-  const lines = fs.readFileSync(jsonlPath, "utf-8").trim().split("\n");
-  const episodes = lines.map((line, idx) => {
+  // Fallback: read scene/batch/instruction from each episode's result.json.
+  // Used when the dataset jsonl isn't shipped for this split (e.g., GT tasks).
+  const episodesDir = path.join(logsDir, safeTask, safeRun, "episodes");
+  if (!fs.existsSync(episodesDir)) {
+    return NextResponse.json({ error: "dataset not found" }, { status: 404 });
+  }
+  const epDirs = fs.readdirSync(episodesDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+    .sort();
+  const episodes = epDirs.map((name) => {
+    const indexMatch = name.match(/^(\d+)_/);
+    const index = indexMatch ? parseInt(indexMatch[1], 10) : 0;
+    const resultPath = path.join(episodesDir, name, "result.json");
     try {
-      const data = JSON.parse(line);
-      return { index: idx, ...data };
+      const result = JSON.parse(fs.readFileSync(resultPath, "utf-8"));
+      return {
+        index,
+        id: result.batch_episode_id ?? result.episode_id,
+        scene: result.scene,
+        instruction: result.instruction,
+        batch: result.batch,
+      };
     } catch {
-      return { index: idx };
+      return { index };
     }
   });
-
   return NextResponse.json(episodes);
 }

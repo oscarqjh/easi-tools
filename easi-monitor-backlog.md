@@ -153,6 +153,21 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [ ] Fallback image lookup in export_video.py for non-LHVLN `rgb_path` conventions (deferred)
 - [ ] Simulator-type guard on map overlay (only enable for habitat_sim tasks) (deferred)
 
+## Phase 5a: Training-Trajectory GT Import
+- [x] Brainstorm + plan conversion pipeline (dfs_vln_traj_gen → easi schema)
+- [x] Conversion script `easi-tools/tools/convert_training_trajectories.py`
+- [x] Run + validate conversion on `unseen_val_filtered` (55 eps; 26 success, 29 missing)
+- [x] Run + validate conversion on `unseen_test_filtered` (114 eps; 63 success, 2 fail, 49 missing)
+- [x] Run + validate conversion on `unseen_train_filtered` (414 eps; 218 success, 5 fail, 191 missing)
+- [x] Wire monitor.yaml: `DFS GT Trajectories` source + per-task maps_dir override for train
+- [x] `/api/episode-meta` + `/api/dataset-episodes` fallback to result.json when benchmark jsonl absent (enables map + scene-group on GT runs)
+- [x] `--include-failures` flag for `fail/` trials (marked with `gt_status: "fail"`)
+- [x] Placeholder dirs for missing eps (`gt_status: "missing"`) to keep 1:1 index alignment
+- [x] Middle-click / Ctrl-click opens new tab on episode list + homepage recent-runs table
+- [ ] Show `gt_status: "missing"` eps as a neutral "NO GT" badge instead of red "FAILED" in the episode list
+- [ ] Cross-task compare smoke test: baseline eval run ↔ GT side-by-side (manual visual pass)
+- [ ] Optional: collapsible + lazy-load per-scene groups on run detail page (defer until train split proves too slow)
+
 ## Phase 5: Task Execution
 - [ ] Manual task start from UI (POST /api/task/start → spawns easi start subprocess)
 - [ ] Task status tracking (PID file, stdout tailing)

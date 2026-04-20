@@ -55,6 +55,24 @@ export async function GET(request: NextRequest) {
   const jsonlPath = path.join(taskConfig.datasets_dir, repoDir, "data", `${split}.jsonl`);
 
   if (!fs.existsSync(jsonlPath)) {
+    // Fallback: synthesize meta from the episode's own result.json. Used when
+    // the dataset jsonl isn't available (e.g., GT trajectories for a split
+    // that isn't shipped in the HF repo).
+    const resultPath = path.join(logsDir, safeTask, safeRun, "episodes", safeEp, "result.json");
+    if (fs.existsSync(resultPath)) {
+      try {
+        const result = JSON.parse(fs.readFileSync(resultPath, "utf-8"));
+        return NextResponse.json({
+          id: result.batch_episode_id ?? result.episode_id,
+          scene: result.scene,
+          instruction: result.instruction,
+          batch: result.batch,
+          source: "result.json",
+        });
+      } catch {
+        // fall through to the original 404
+      }
+    }
     return NextResponse.json({ error: `dataset not found: ${jsonlPath}` }, { status: 404 });
   }
 

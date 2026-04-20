@@ -4,10 +4,18 @@
 sources:
   - name: "Local Logs"
     path: /mnt/umm/users/qianjianheng/workspace/eval_results_easi
+  - name: "DFS GT Trajectories"
+    path: /mnt/umm/users/qianjianheng/workspace/data/lhprvln_dfs_trajgen_easi_data
 
-# Per-task configuration (keyed by task name prefix)
-# A task matches the first prefix that starts its name.
+# Per-task configuration (keyed by task name prefix).
+# A task matches the FIRST prefix that starts its name — list more-specific
+# prefixes before generic ones.
 tasks:
+  # Train GT scenes (000-499) aren't in the HF maps.zip, so read maps from the
+  # local trajectory-gen scene_outputs instead.
+  lhpr_vln_unseen_train_gt_filtered_dfs:
+    maps_dir: /mnt/umm/users/qianjianheng/workspace/dfs_vln_traj_gen/outputs/scene_outputs
+    datasets_dir: /mnt/umm/users/qianjianheng/workspace/EASI/datasets
   lhpr_vln:
     maps_dir: /mnt/umm/users/qianjianheng/workspace/EASI/datasets/oscarqjh_LHPR-VLN_easi/maps
     datasets_dir: /mnt/umm/users/qianjianheng/workspace/EASI/datasets

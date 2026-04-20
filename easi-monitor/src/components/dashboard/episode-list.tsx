@@ -32,6 +32,18 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
   const router = useRouter();
   const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
 
+  // Handle row navigation. Middle-click / Ctrl / Cmd / Shift open in a new tab.
+  function navigate(href: string, e: React.MouseEvent) {
+    const wantsNewTab =
+      e.button === 1 || e.ctrlKey || e.metaKey || e.shiftKey;
+    if (wantsNewTab) {
+      window.open(href, "_blank", "noopener,noreferrer");
+      e.preventDefault();
+      return;
+    }
+    router.push(href);
+  }
+
   return (
     <div className="border rounded-sm overflow-hidden">
       <table className="w-full text-sm">
@@ -58,11 +70,14 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
               const instruction = ep.result?.instruction ?? "";
               const steps = ep.result?.num_steps as number | undefined;
               const time = ep.result?.elapsed_seconds;
+              const href = `/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}${sourceQuery}`;
               return (
                 <tr
                   key={ep.episodeDir}
                   className={`border-b border-border hover:bg-accent transition-colors cursor-pointer ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
-                  onClick={() => router.push(`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}${sourceQuery}`)}
+                  onClick={(e) => navigate(href, e)}
+                  onAuxClick={(e) => { if (e.button === 1) navigate(href, e); }}
+                  onMouseDown={(e) => { if (e.button === 1) e.preventDefault(); }}
                 >
                   <td className="px-4 py-2"><StatusBadge status={status} /></td>
                   <td className="px-4 py-2 font-mono text-primary">{ep.episodeId}</td>

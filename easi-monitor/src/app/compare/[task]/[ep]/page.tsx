@@ -75,28 +75,32 @@ export default function ComparePage() {
   const rightRunId = searchParams.get("right");
   const isCrossTask = leftTask !== rightTask;
 
-  const sourceQuery = sourcePath
-    ? `&source=${encodeURIComponent(sourcePath)}`
-    : "";
-
-  // Tasks for dropdowns — filter to same source if set.
+  // All tasks — unfiltered, so cross-source compare is possible.
   const { tasks: allTasks } = useTasks();
-  const tasksForSource = useMemo(() => {
-    if (!sourcePath) return allTasks;
-    return allTasks.filter((t) => t.sourcePath === sourcePath);
-  }, [allTasks, sourcePath]);
+  const tasksForSource = allTasks;
+
+  // Derive each side's source from the selected task. Falls back to the URL
+  // source (legacy same-task URLs) when we haven't loaded the task list yet.
+  const leftSource = useMemo(
+    () => allTasks.find((t) => t.name === leftTask)?.sourcePath ?? sourcePath,
+    [allTasks, leftTask, sourcePath],
+  );
+  const rightSource = useMemo(
+    () => allTasks.find((t) => t.name === rightTask)?.sourcePath ?? sourcePath,
+    [allTasks, rightTask, sourcePath],
+  );
 
   // Runs per side.
-  const { runs: leftRuns } = useRuns(leftTask, sourcePath);
-  const { runs: rightRuns } = useRuns(rightTask, sourcePath);
+  const { runs: leftRuns } = useRuns(leftTask, leftSource);
+  const { runs: rightRuns } = useRuns(rightTask, rightSource);
 
   // Trajectories per side.
-  const { trajectory: leftTraj } = useTrajectory(leftTask, leftRunId, ep, sourcePath);
-  const { trajectory: rightTraj } = useTrajectory(rightTask, rightRunId, ep, sourcePath);
+  const { trajectory: leftTraj } = useTrajectory(leftTask, leftRunId, ep, leftSource);
+  const { trajectory: rightTraj } = useTrajectory(rightTask, rightRunId, ep, rightSource);
 
   // Episode lists per side — intersection drives navigation.
-  const { episodes: leftEps } = useEpisodes(leftTask, leftRunId, sourcePath);
-  const { episodes: rightEps } = useEpisodes(rightTask, rightRunId, sourcePath);
+  const { episodes: leftEps } = useEpisodes(leftTask, leftRunId, leftSource);
+  const { episodes: rightEps } = useEpisodes(rightTask, rightRunId, rightSource);
   const navEpisodes = useMemo(() => {
     const source = leftEps.length > 0 ? leftEps : rightEps;
     const other = leftEps.length > 0 ? rightEps : leftEps;
@@ -123,8 +127,8 @@ export default function ComparePage() {
   }
 
   // Episode meta: scene id from either side (same episode => same scene).
-  const leftMeta = useEpisodeMeta(leftTask, leftRunId, ep, sourcePath);
-  const rightMeta = useEpisodeMeta(rightTask, rightRunId, ep, sourcePath);
+  const leftMeta = useEpisodeMeta(leftTask, leftRunId, ep, leftSource);
+  const rightMeta = useEpisodeMeta(rightTask, rightRunId, ep, rightSource);
   const sceneId =
     (leftMeta?.meta?.scene ? String(leftMeta.meta.scene) : null) ??
     (rightMeta?.meta?.scene ? String(rightMeta.meta.scene) : null);
@@ -133,15 +137,16 @@ export default function ComparePage() {
   const [instruction, setInstruction] = useState<string | null>(null);
   useEffect(() => {
     setInstruction(null);
-    const attempts: Array<{ task: string; run: string }> = [];
-    if (leftRunId) attempts.push({ task: leftTask, run: leftRunId });
-    if (rightRunId) attempts.push({ task: rightTask, run: rightRunId });
+    const attempts: Array<{ task: string; run: string; source: string | null }> = [];
+    if (leftRunId) attempts.push({ task: leftTask, run: leftRunId, source: leftSource });
+    if (rightRunId) attempts.push({ task: rightTask, run: rightRunId, source: rightSource });
     let cancelled = false;
     (async () => {
       for (const a of attempts) {
         try {
+          const sq = a.source ? `&source=${encodeURIComponent(a.source)}` : "";
           const res = await fetch(
-            `/api/episodes?task=${encodeURIComponent(a.task)}&run=${encodeURIComponent(a.run)}${sourceQuery}`,
+            `/api/episodes?task=${encodeURIComponent(a.task)}&run=${encodeURIComponent(a.run)}${sq}`,
           );
           if (!res.ok) continue;
           const eps: Array<{ episodeDir: string; result: { instruction?: string } | null }> =
@@ -157,7 +162,7 @@ export default function ComparePage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [leftTask, leftRunId, rightTask, rightRunId, ep, sourceQuery]);
+  }, [leftTask, leftRunId, leftSource, rightTask, rightRunId, rightSource, ep]);
 
   // Per-side run configs.
   const [leftConfig, setLeftConfig] = useState<RunConfig | null>(null);
@@ -166,20 +171,22 @@ export default function ComparePage() {
   useEffect(() => {
     setLeftConfig(null);
     if (!leftRunId) return;
-    fetch(`/api/run?task=${encodeURIComponent(leftTask)}&run=${encodeURIComponent(leftRunId)}${sourceQuery}`)
+    const sq = leftSource ? `&source=${encodeURIComponent(leftSource)}` : "";
+    fetch(`/api/run?task=${encodeURIComponent(leftTask)}&run=${encodeURIComponent(leftRunId)}${sq}`)
       .then((r) => r.json())
       .then((d) => setLeftConfig(d.config ?? null))
       .catch(console.error);
-  }, [leftTask, leftRunId, sourceQuery]);
+  }, [leftTask, leftRunId, leftSource]);
 
   useEffect(() => {
     setRightConfig(null);
     if (!rightRunId) return;
-    fetch(`/api/run?task=${encodeURIComponent(rightTask)}&run=${encodeURIComponent(rightRunId)}${sourceQuery}`)
+    const sq = rightSource ? `&source=${encodeURIComponent(rightSource)}` : "";
+    fetch(`/api/run?task=${encodeURIComponent(rightTask)}&run=${encodeURIComponent(rightRunId)}${sq}`)
       .then((r) => r.json())
       .then((d) => setRightConfig(d.config ?? null))
       .catch(console.error);
-  }, [rightTask, rightRunId, sourceQuery]);
+  }, [rightTask, rightRunId, rightSource]);
 
   // Shared playback state.
   const [currentStep, setCurrentStep] = useState(0);
@@ -357,7 +364,7 @@ export default function ComparePage() {
                 onStepChange={handleStepChange}
                 playing={playing}
                 onPlayingChange={setPlaying}
-                sourcePath={sourcePath}
+                sourcePath={leftSource}
                 hideControls
                 speed={speed}
               />
@@ -398,7 +405,7 @@ export default function ComparePage() {
                 onStepChange={handleStepChange}
                 playing={playing}
                 onPlayingChange={setPlaying}
-                sourcePath={sourcePath}
+                sourcePath={rightSource}
                 hideControls
                 speed={speed}
               />

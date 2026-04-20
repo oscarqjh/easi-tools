@@ -173,11 +173,23 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.recentRuns.map((run, idx) => (
+              {data.recentRuns.map((run, idx) => {
+                const href = `/task/${encodeURIComponent(run.task)}/${encodeURIComponent(run.runId)}?source=${encodeURIComponent(run.sourcePath)}`;
+                const navigate = (e: React.MouseEvent) => {
+                  if (e.button === 1 || e.ctrlKey || e.metaKey || e.shiftKey) {
+                    window.open(href, "_blank", "noopener,noreferrer");
+                    e.preventDefault();
+                    return;
+                  }
+                  router.push(href);
+                };
+                return (
                 <tr
                   key={`${run.sourcePath}:${run.task}-${run.runId}`}
                   className={`border-b border-border hover:bg-accent transition-colors cursor-pointer ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
-                  onClick={() => router.push(`/task/${encodeURIComponent(run.task)}/${encodeURIComponent(run.runId)}?source=${encodeURIComponent(run.sourcePath)}`)}
+                  onClick={navigate}
+                  onAuxClick={(e) => { if (e.button === 1) navigate(e); }}
+                  onMouseDown={(e) => { if (e.button === 1) e.preventDefault(); }}
                 >
                   <td className="px-4 py-2 font-mono text-primary text-xs">{run.task}</td>
                   {hasMultipleSources && (
@@ -194,7 +206,8 @@ export default function Dashboard() {
                     {timeAgo(run.date)}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {data.recentRuns.length === 0 && (
                 <tr>
                   <td colSpan={hasMultipleSources ? 6 : 5} className="px-4 py-8 text-center text-muted-foreground">

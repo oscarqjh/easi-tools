@@ -1,5 +1,21 @@
 # easi-monitor Changelog
 
+## [0.11.0] - 2026-04-20
+
+### Added
+- Training-trajectory GT ingest: new `easi-tools/tools/convert_training_trajectories.py` materialises `dfs_vln_traj_gen` success/fail trials into the easi on-disk run layout (symlinked PNGs, synthetic result.json, trajectory.jsonl, config.json)
+- Three GT tasks surfaced in the monitor: `lhpr_vln_unseen_val_gt_filtered_dfs`, `lhpr_vln_unseen_test_gt_filtered_dfs`, `lhpr_vln_unseen_train_gt_filtered_dfs` (train derived from the visible-ratio CSV minus val/test)
+- Missing-episode placeholder dirs: keeps 1:1 index alignment with the benchmark jsonl; `result.json` carries `gt_status` (success/fail/missing)
+- `monitor.yaml` new source `DFS GT Trajectories` pointing at the converted output dir
+- Train-task map override in `monitor.yaml`: `lhpr_vln_unseen_train_gt_filtered_dfs` maps come from the local `scene_outputs` (training scenes aren't in the HF maps.zip)
+- Middle-click / Ctrl-click / Cmd-click / Shift-click now open a new tab on the episode list rows and the homepage recent-runs table (`onAuxClick` + `onMouseDown` autoscroll guard)
+
+### Changed
+- `/api/episode-meta`: when the benchmark jsonl is absent, falls back to the episode's own `result.json` (returns scene/instruction/batch). Unblocks map overlay for GT train episodes.
+- `/api/dataset-episodes`: same jsonl-missing fallback — scans each `result.json` under the run's `episodes/` dir so Group-by-Scene works on GT runs.
+- Compare page derives each side's `sourcePath` from the selected task's own source (via `/api/tasks`) instead of a single shared URL param. Enables compare across sources (e.g., eval run vs GT run).
+- Task dropdown on compare page no longer filtered by URL `source` — shows every task so cross-source comparisons are pickable.
+
 ## [0.10.0] - 2026-04-19
 
 ### Added
