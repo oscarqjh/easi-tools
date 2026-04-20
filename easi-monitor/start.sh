@@ -46,4 +46,15 @@ echo "============================================"
 echo ""
 
 cd "$SCRIPT_DIR"
-npx next start --hostname 0.0.0.0 --port "$PORT" 2>/dev/null || npm run dev -- --hostname 0.0.0.0 --port "$PORT"
+
+# Production build lives in .next-prod so `next dev` (which owns .next) can run
+# concurrently without clobbering it.
+export NEXT_DIST_DIR=".next-prod"
+
+if [ ! -d "$NEXT_DIST_DIR" ] || [ ! -f "$NEXT_DIST_DIR/BUILD_ID" ]; then
+    echo "Error: No production build found at $SCRIPT_DIR/$NEXT_DIST_DIR"
+    echo "Run 'npm run build:prod' first (or ask qianjianheng to rebuild)."
+    exit 1
+fi
+
+exec npx next start --hostname 0.0.0.0 --port "$PORT"
