@@ -28,6 +28,9 @@ _DEFAULTS = {
     "llm_gpus": None,
     "llm_kwargs": {},
     "verbosity": None,
+    # null / omitted = process every discovered checkpoint.
+    # list of names ("checkpoint-1000") or step numbers (1000) = only those.
+    "checkpoint_filter": None,
 }
 
 

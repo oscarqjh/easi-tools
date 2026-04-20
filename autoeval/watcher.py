@@ -32,13 +32,35 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def discover_checkpoints(target_dirs: Path | list[Path]) -> list[Path]:
+def discover_checkpoints(
+    target_dirs: Path | list[Path],
+    filter_items: list | None = None,
+) -> list[Path]:
     """Find checkpoint-* dirs that have trainer_state.json, sorted by number ascending.
 
     Accepts a single directory or a list of directories to scan.
+
+    If ``filter_items`` is provided, only checkpoints whose directory name
+    (``checkpoint-<N>``) or step number (``<N>``) appears in the filter
+    are returned. Accepts a mix of ``str`` and ``int`` entries.
     """
     if isinstance(target_dirs, (str, Path)):
         target_dirs = [target_dirs]
+
+    allowed_names: set[str] | None = None
+    allowed_nums: set[int] | None = None
+    if filter_items is not None:
+        allowed_names = set()
+        allowed_nums = set()
+        for item in filter_items:
+            if isinstance(item, int):
+                allowed_nums.add(item)
+            else:
+                s = str(item).strip()
+                allowed_names.add(s)
+                m = _CKPT_NUM_RE.match(s)
+                if m:
+                    allowed_nums.add(int(m.group(1)))
 
     checkpoints = []
     for target_dir in target_dirs:
@@ -53,7 +75,11 @@ def discover_checkpoints(target_dirs: Path | list[Path]) -> list[Path]:
                 continue
             if not (d / "trainer_state.json").exists():
                 continue
-            checkpoints.append((int(m.group(1)), d))
+            num = int(m.group(1))
+            if allowed_names is not None:
+                if d.name not in allowed_names and num not in allowed_nums:
+                    continue
+            checkpoints.append((num, d))
 
     checkpoints.sort(key=lambda x: x[0])
     return [d for _, d in checkpoints]
@@ -477,7 +503,10 @@ def main() -> None:
             continue
 
         # 1. Discover checkpoints from all target directories
-        checkpoints = discover_checkpoints(target_dirs)
+        checkpoint_filter = config.get("checkpoint_filter")
+        checkpoints = discover_checkpoints(target_dirs, filter_items=checkpoint_filter)
+        if checkpoint_filter:
+            _log(f"Checkpoint filter active: {checkpoint_filter}")
 
         # 2. Scan completed runs per task, collect stale/in-progress
         handled_per_task: dict[str, set[str]] = {}

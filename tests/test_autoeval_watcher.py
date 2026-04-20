@@ -42,6 +42,60 @@ def test_discover_checkpoints_empty(tmp_path):
     assert discover_checkpoints(tmp_path) == []
 
 
+def test_discover_checkpoints_filter_by_name(tmp_path):
+    """Filter accepts full checkpoint-<N> directory names."""
+    from autoeval.watcher import discover_checkpoints
+
+    for n in [30, 60, 105]:
+        d = tmp_path / f"checkpoint-{n}"
+        d.mkdir()
+        (d / "trainer_state.json").write_text("{}")
+
+    result = discover_checkpoints(
+        tmp_path, filter_items=["checkpoint-30", "checkpoint-105"]
+    )
+    assert [r.name for r in result] == ["checkpoint-30", "checkpoint-105"]
+
+
+def test_discover_checkpoints_filter_by_number(tmp_path):
+    """Filter accepts integer step numbers."""
+    from autoeval.watcher import discover_checkpoints
+
+    for n in [30, 60, 105]:
+        d = tmp_path / f"checkpoint-{n}"
+        d.mkdir()
+        (d / "trainer_state.json").write_text("{}")
+
+    result = discover_checkpoints(tmp_path, filter_items=[60, 105])
+    assert [r.name for r in result] == ["checkpoint-60", "checkpoint-105"]
+
+
+def test_discover_checkpoints_filter_mixed(tmp_path):
+    """Filter accepts a mix of names and numbers; unknown entries ignored."""
+    from autoeval.watcher import discover_checkpoints
+
+    for n in [30, 60, 105]:
+        d = tmp_path / f"checkpoint-{n}"
+        d.mkdir()
+        (d / "trainer_state.json").write_text("{}")
+
+    result = discover_checkpoints(
+        tmp_path, filter_items=[30, "checkpoint-999", "checkpoint-105"]
+    )
+    assert [r.name for r in result] == ["checkpoint-30", "checkpoint-105"]
+
+
+def test_discover_checkpoints_filter_empty_list_excludes_all(tmp_path):
+    """Empty filter list returns no checkpoints (distinct from None)."""
+    from autoeval.watcher import discover_checkpoints
+
+    d = tmp_path / "checkpoint-30"
+    d.mkdir()
+    (d / "trainer_state.json").write_text("{}")
+
+    assert discover_checkpoints(tmp_path, filter_items=[]) == []
+
+
 def test_discover_checkpoints_multiple_dirs(tmp_path):
     """Discover from multiple directories, merged and sorted."""
     from autoeval.watcher import discover_checkpoints
