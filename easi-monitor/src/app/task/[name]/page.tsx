@@ -13,7 +13,7 @@ function RunsSkeleton() {
     <div className="space-y-6">
       <div className="h-4 w-96 bg-card rounded-sm animate-pulse" />
       <div className="border border-border rounded-sm overflow-hidden">
-        <div className="bg-[#1C1C28] px-4 py-2.5">
+        <div className="bg-popover px-4 py-2.5">
           <div className="h-3 w-full bg-muted-foreground/10 rounded-sm animate-pulse" />
         </div>
         {Array.from({ length: 5 }).map((_, i) => (
@@ -105,7 +105,7 @@ export default function TaskDetailPage() {
             <div className="border border-border rounded-sm overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-[#1C1C28]">
+                  <tr className="border-b bg-popover">
                     <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Model</th>
                     <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground cursor-pointer hover:text-foreground select-none" onClick={() => toggleSort("date")}>
                       <span className="inline-flex items-center gap-1">Date {sortField === "date" && (sortDir === "asc" ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />)}</span>
@@ -137,12 +137,12 @@ export default function TaskDetailPage() {
                         ? String(run.summary.num_episodes)
                         : "\u2014";
                       const statusLabel = run.hasSummary ? "Complete" : "In Progress";
-                      const statusBg = run.hasSummary ? "bg-[#34D399]" : "bg-[#FBBF24]";
+                      const statusBg = run.hasSummary ? "bg-success" : "bg-warning";
 
                       return (
                         <tr
                           key={run.runId}
-                          className={`border-b border-border hover:bg-[#252535] transition-colors ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
+                          className={`border-b border-border hover:bg-accent transition-colors ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
                         >
                           <td className="px-4 py-2">
                             <Link
@@ -159,7 +159,7 @@ export default function TaskDetailPage() {
                           <td className="px-4 py-2 text-right font-mono text-xs">{avgSteps}</td>
                           <td className="px-4 py-2 text-right font-mono text-xs">{episodes}</td>
                           <td className="px-4 py-2 text-right">
-                            <span className={`${statusBg} text-[#0A0A0F] text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-sm`}>
+                            <span className={`${statusBg} text-background text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-sm`}>
                               {statusLabel}
                             </span>
                           </td>

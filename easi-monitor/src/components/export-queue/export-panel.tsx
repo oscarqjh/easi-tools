@@ -22,7 +22,7 @@ export function ExportPanel() {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-50 border border-border rounded-sm bg-[#12121A] w-80"
+      className="fixed bottom-4 right-4 z-50 border border-border rounded-sm bg-card w-80"
       style={{ fontVariantLigatures: "none" }}
     >
       {/* Header */}
@@ -80,7 +80,7 @@ export function ExportPanel() {
               {/* Progress bar */}
               {job.status === "exporting" && job.progress && (
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1 bg-[#1C1C28] rounded-sm overflow-hidden">
+                  <div className="flex-1 h-1 bg-popover rounded-sm overflow-hidden">
                     <div
                       className="h-full bg-primary rounded-sm transition-all"
                       style={{
@@ -101,8 +101,8 @@ export function ExportPanel() {
                 {job.status === "exporting" && (
                   <Loader2 className="size-3 animate-spin text-primary" />
                 )}
-                {job.status === "done" && <CheckCircle className="size-3 text-[#34D399]" />}
-                {job.status === "error" && <AlertCircle className="size-3 text-[#F87171]" />}
+                {job.status === "done" && <CheckCircle className="size-3 text-success" />}
+                {job.status === "error" && <AlertCircle className="size-3 text-destructive" />}
                 <span className="text-[10px] text-muted-foreground font-mono">
                   {job.status === "pending" && "Queued..."}
                   {job.status === "exporting" && "Exporting..."}

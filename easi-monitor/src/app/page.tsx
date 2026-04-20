@@ -37,7 +37,7 @@ function OverviewSkeleton() {
       <div>
         <div className="h-3 w-28 bg-card rounded-sm animate-pulse mb-3" />
         <div className="border border-border rounded-sm overflow-hidden">
-          <div className="bg-[#1C1C28] px-4 py-2.5">
+          <div className="bg-popover px-4 py-2.5">
             <div className="h-3 w-full bg-muted-foreground/10 rounded-sm animate-pulse" />
           </div>
           {Array.from({ length: 5 }).map((_, i) => (
@@ -82,10 +82,10 @@ export default function Dashboard() {
   }
 
   const statCards = [
-    { label: "Total Runs", value: String(data.totalRuns), accent: "border-l-[#00D4AA]" },
-    { label: "Tasks", value: String(data.totalTasks), accent: "border-l-[#60A5FA]" },
-    { label: "Episodes", value: data.totalEpisodes.toLocaleString(), accent: "border-l-[#FBBF24]" },
-    { label: "Max Success Rate", value: `${(data.maxSuccessRate * 100).toFixed(1)}%`, accent: "border-l-[#34D399]" },
+    { label: "Total Runs", value: String(data.totalRuns), accent: "border-l-primary" },
+    { label: "Tasks", value: String(data.totalTasks), accent: "border-l-info" },
+    { label: "Episodes", value: data.totalEpisodes.toLocaleString(), accent: "border-l-warning" },
+    { label: "Max Success Rate", value: `${(data.maxSuccessRate * 100).toFixed(1)}%`, accent: "border-l-success" },
   ];
 
   const hasMultipleSources = new Set(data.tasks.map(t => t.source)).size > 1;
@@ -119,12 +119,12 @@ export default function Dashboard() {
             <Link
               key={`${task.sourcePath}:${task.name}`}
               href={`/task/${encodeURIComponent(task.name)}?source=${encodeURIComponent(task.sourcePath)}`}
-              className="block border border-border rounded-sm p-4 hover:bg-[#252535] transition-colors"
+              className="block border border-border rounded-sm p-4 hover:bg-accent transition-colors"
             >
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm text-foreground">{task.name}</span>
                 {hasMultipleSources && (
-                  <span className="text-[10px] text-muted-foreground font-sans px-1.5 py-0.5 bg-[#1C1C28] rounded-sm">
+                  <span className="text-[10px] text-muted-foreground font-sans px-1.5 py-0.5 bg-popover rounded-sm">
                     {task.source}
                   </span>
                 )}
@@ -161,7 +161,7 @@ export default function Dashboard() {
         <div className="border border-border rounded-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-[#1C1C28]">
+              <tr className="border-b bg-popover">
                 <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Task</th>
                 {hasMultipleSources && (
                   <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Source</th>
@@ -176,7 +176,7 @@ export default function Dashboard() {
               {data.recentRuns.map((run, idx) => (
                 <tr
                   key={`${run.sourcePath}:${run.task}-${run.runId}`}
-                  className={`border-b border-border hover:bg-[#252535] transition-colors cursor-pointer ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
+                  className={`border-b border-border hover:bg-accent transition-colors cursor-pointer ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
                   onClick={() => router.push(`/task/${encodeURIComponent(run.task)}/${encodeURIComponent(run.runId)}?source=${encodeURIComponent(run.sourcePath)}`)}
                 >
                   <td className="px-4 py-2 font-mono text-primary text-xs">{run.task}</td>

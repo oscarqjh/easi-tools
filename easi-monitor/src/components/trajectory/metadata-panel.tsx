@@ -25,7 +25,7 @@ export function MetadataPanel({ step, totalSteps, config, trajectory, currentSte
 
   return (
     <div className="border border-border rounded-sm">
-      <div className="px-4 py-2 border-b border-border bg-[#1C1C28]">
+      <div className="px-4 py-2 border-b border-border bg-popover">
         <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">
           Step Details
         </div>

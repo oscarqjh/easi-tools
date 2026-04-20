@@ -13,6 +13,11 @@ interface Props {
 
 const ORTHO_SCALE_FACTOR = 1.632;
 
+function cssVar(name: string): string {
+  if (typeof window === "undefined") return "";
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 function worldToPixel(worldX: number, worldZ: number, params: RenderParams) {
   const mpp = params.ortho_scale / ORTHO_SCALE_FACTOR;
   return {
@@ -155,9 +160,13 @@ export function MapOverlay({ sceneId, task, trajectory, currentStep, onStepClick
 
     if (points.length === 0) return;
 
+    const primary = cssVar("--primary");
+    const success = cssVar("--success");
+    const destructive = cssVar("--destructive");
+
     // Draw past trajectory (solid line)
     ctx.beginPath();
-    ctx.strokeStyle = "#00D4AA80";
+    ctx.strokeStyle = `${primary}80`;
     ctx.lineWidth = 2;
     ctx.setLineDash([]);
     let started = false;
@@ -174,7 +183,7 @@ export function MapOverlay({ sceneId, task, trajectory, currentStep, onStepClick
 
     // Draw future trajectory (dotted)
     ctx.beginPath();
-    ctx.strokeStyle = "#00D4AA30";
+    ctx.strokeStyle = `${primary}30`;
     ctx.lineWidth = 2;
     ctx.setLineDash([4, 4]);
     started = false;
@@ -193,7 +202,7 @@ export function MapOverlay({ sceneId, task, trajectory, currentStep, onStepClick
     // Draw start position (green dot)
     if (points.length > 0) {
       const start = points[0];
-      ctx.fillStyle = "#34D399";
+      ctx.fillStyle = success;
       ctx.beginPath();
       ctx.arc(start.x, start.y, 5, 0, Math.PI * 2);
       ctx.fill();
@@ -203,7 +212,7 @@ export function MapOverlay({ sceneId, task, trajectory, currentStep, onStepClick
     const lastStep = trajectory[trajectory.length - 1];
     if (lastStep?.done && points.length > 0) {
       const end = points[points.length - 1];
-      ctx.fillStyle = "#F87171";
+      ctx.fillStyle = destructive;
       ctx.beginPath();
       ctx.arc(end.x, end.y, 5, 0, Math.PI * 2);
       ctx.fill();
@@ -213,13 +222,13 @@ export function MapOverlay({ sceneId, task, trajectory, currentStep, onStepClick
     const curPose = trajectory[currentStep]?.agent_pose;
     if (curPose && curPose.length >= 3) {
       const cur = toCanvas(curPose[0], curPose[2]);
-      ctx.fillStyle = "#00D4AA";
+      ctx.fillStyle = primary;
       ctx.beginPath();
       ctx.arc(cur.x, cur.y, 6, 0, Math.PI * 2);
       ctx.fill();
 
       // Outer ring for visibility
-      ctx.strokeStyle = "#00D4AA60";
+      ctx.strokeStyle = `${primary}60`;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(cur.x, cur.y, 10, 0, Math.PI * 2);
@@ -312,7 +321,7 @@ export function MapOverlay({ sceneId, task, trajectory, currentStep, onStepClick
       </div>
       {/* Floor indicator overlay */}
       {meta.floor_heights && meta.floor_heights.num_floors > 1 && (
-        <div className="absolute top-2 left-2 bg-[#0A0A0F]/80 text-[10px] font-mono text-muted-foreground px-2 py-1 rounded-sm">
+        <div className="absolute top-2 left-2 bg-background/80 text-[10px] font-mono text-muted-foreground px-2 py-1 rounded-sm">
           Floor {currentFloor} / {meta.floor_heights.num_floors}
         </div>
       )}

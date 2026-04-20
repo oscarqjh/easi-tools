@@ -25,7 +25,7 @@ export function MetricsPanel({ summary }: Props) {
     {
       label: "Episodes",
       value: String(summary.num_episodes),
-      accentColor: "border-l-[#00D4AA]",
+      accentColor: "border-l-primary",
     },
   ];
 
@@ -33,35 +33,35 @@ export function MetricsPanel({ summary }: Props) {
     cards.push({
       label: "Success Rate",
       value: `${(summary.success_rate * 100).toFixed(1)}%`,
-      accentColor: "border-l-[#34D399]",
+      accentColor: "border-l-success",
     });
   }
   if (typeof summary.avg_steps === "number") {
     cards.push({
       label: "Avg Steps",
       value: String(Math.round(summary.avg_steps)),
-      accentColor: "border-l-[#60A5FA]",
+      accentColor: "border-l-info",
     });
   }
   if (typeof summary.median_steps === "number") {
     cards.push({
       label: "Median Steps",
       value: String(Math.round(summary.median_steps)),
-      accentColor: "border-l-[#A78BFA]",
+      accentColor: "border-l-purple",
     });
   }
   if (typeof summary.wall_clock_seconds === "number") {
     cards.push({
       label: "Wall Clock",
       value: `${Math.round(summary.wall_clock_seconds / 60)}m`,
-      accentColor: "border-l-[#FBBF24]",
+      accentColor: "border-l-warning",
     });
   }
   if (summary.llm_usage?.total_tokens) {
     cards.push({
       label: "Total Tokens",
       value: summary.llm_usage.total_tokens.toLocaleString(),
-      accentColor: "border-l-[#F87171]",
+      accentColor: "border-l-destructive",
     });
   }
 
@@ -74,7 +74,7 @@ export function MetricsPanel({ summary }: Props) {
         value: typeof val === "number" && val < 1 && val > 0
           ? `${(val * 100).toFixed(1)}%`
           : String(Math.round(val * 1000) / 1000),
-        accentColor: "border-l-[#64748B]",
+        accentColor: "border-l-muted-foreground",
       });
     }
   }

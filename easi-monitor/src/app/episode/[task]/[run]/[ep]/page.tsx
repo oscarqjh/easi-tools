@@ -159,7 +159,7 @@ export default function EpisodePage() {
           <button
             disabled={!prevEp}
             onClick={() => prevEp && navigateToEpisode(prevEp.episodeDir)}
-            className="px-1.5 py-1 border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-muted-foreground"
+            className="px-1.5 py-1 border border-border rounded-sm hover:bg-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-muted-foreground"
           >
             <ArrowLeft className="size-3.5" />
           </button>
@@ -175,7 +175,7 @@ export default function EpisodePage() {
           <button
             disabled={!nextEp}
             onClick={() => nextEp && navigateToEpisode(nextEp.episodeDir)}
-            className="px-1.5 py-1 border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-muted-foreground"
+            className="px-1.5 py-1 border border-border rounded-sm hover:bg-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-muted-foreground"
           >
             <ArrowRight2 className="size-3.5" />
           </button>
@@ -189,7 +189,7 @@ export default function EpisodePage() {
       <div className="flex items-center gap-3">
         <Link
           href={`/compare/${encodeURIComponent(task)}/${encodeURIComponent(ep)}?left=${encodeURIComponent(run)}${sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : ""}`}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-border rounded-sm hover:bg-[#252535] transition-colors text-muted-foreground"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-border rounded-sm hover:bg-accent transition-colors text-muted-foreground"
         >
           <Columns2 className="size-3.5" />
           Compare
@@ -205,7 +205,7 @@ export default function EpisodePage() {
                 className={`px-2 py-0.5 text-xs font-mono rounded-sm border transition-colors ${
                   exportFps === f
                     ? "border-primary text-primary bg-primary/10"
-                    : "border-border text-muted-foreground hover:bg-[#252535]"
+                    : "border-border text-muted-foreground hover:bg-accent"
                 } disabled:opacity-50`}
               >
                 {f}
@@ -216,7 +216,7 @@ export default function EpisodePage() {
         <button
           disabled={isExporting}
           onClick={() => exportQueue.startExport(task, run, ep, sourcePath, exportFps)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-border rounded-sm hover:bg-[#252535] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-muted-foreground"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-border rounded-sm hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-muted-foreground"
         >
           {isExporting ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" />}
           {isExporting && currentJob?.progress

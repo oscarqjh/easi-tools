@@ -83,7 +83,7 @@ export function FrameViewer({ task, run, ep, trajectory, camera, currentStep, on
             Loading frame...
           </div>
         )}
-        <div className="absolute top-2 right-2 bg-[#0A0A0F]/80 text-[10px] font-mono text-muted-foreground px-2 py-1 rounded-sm">
+        <div className="absolute top-2 right-2 bg-background/80 text-[10px] font-mono text-muted-foreground px-2 py-1 rounded-sm">
           {currentStep} / {maxStep}
         </div>
       </div>

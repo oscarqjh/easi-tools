@@ -38,7 +38,7 @@ export function TimelineMarkers({ trajectory, onStepClick }: Props) {
 
   if (markers.length === 0) return null;
 
-  const colors = { fallback: "bg-[#F87171]", subtask: "bg-[#34D399]", done: "bg-[#60A5FA]" };
+  const colors = { fallback: "bg-destructive", subtask: "bg-success", done: "bg-info" };
 
   return (
     <TooltipProvider>
@@ -58,9 +58,9 @@ export function TimelineMarkers({ trajectory, onStepClick }: Props) {
         {(() => {
           const usedTypes = new Set(markers.map(m => m.type));
           const legendItems = [
-            { type: "fallback", color: "bg-[#F87171]", label: "Fallback" },
-            { type: "subtask", color: "bg-[#34D399]", label: "Subtask" },
-            { type: "done", color: "bg-[#60A5FA]", label: "End" },
+            { type: "fallback", color: "bg-destructive", label: "Fallback" },
+            { type: "subtask", color: "bg-success", label: "Subtask" },
+            { type: "done", color: "bg-info", label: "End" },
           ].filter(item => usedTypes.has(item.type as Marker["type"]));
           return (
             <div className="flex gap-4 text-xs text-muted-foreground">

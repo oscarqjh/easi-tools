@@ -31,7 +31,7 @@ function MetricsSkeleton() {
 function EpisodesSkeleton() {
   return (
     <div className="border rounded-sm overflow-hidden">
-      <div className="bg-[#1C1C28] px-4 py-2.5">
+      <div className="bg-popover px-4 py-2.5">
         <div className="h-3 w-full bg-muted-foreground/10 rounded-sm animate-pulse" />
       </div>
       {Array.from({ length: 5 }).map((_, i) => (
@@ -180,7 +180,7 @@ export default function RunDetailPage() {
                     className={`px-2 py-0.5 text-xs font-mono rounded-sm border transition-colors ${
                       groupBy === g
                         ? "border-primary text-primary bg-primary/10"
-                        : "border-border text-muted-foreground hover:bg-[#252535]"
+                        : "border-border text-muted-foreground hover:bg-accent"
                     }`}
                   >
                     {g === "none" ? "None" : g.charAt(0).toUpperCase() + g.slice(1)}

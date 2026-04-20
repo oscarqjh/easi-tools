@@ -12,10 +12,10 @@ interface Props {
 }
 
 const statusConfig: Record<string, { label: string; badgeBg: string; borderColor: string }> = {
-  success: { label: "SUCCESS", badgeBg: "bg-[#34D399]", borderColor: "border-l-[#34D399]" },
-  fail: { label: "FAILED", badgeBg: "bg-[#F87171]", borderColor: "border-l-[#F87171]" },
-  early_stop: { label: "EARLY STOP", badgeBg: "bg-[#FBBF24]", borderColor: "border-l-[#FBBF24]" },
-  unknown: { label: "UNKNOWN", badgeBg: "bg-[#64748B]", borderColor: "border-l-[#64748B]" },
+  success: { label: "SUCCESS", badgeBg: "bg-success", borderColor: "border-l-success" },
+  fail: { label: "FAILED", badgeBg: "bg-destructive", borderColor: "border-l-destructive" },
+  early_stop: { label: "EARLY STOP", badgeBg: "bg-warning", borderColor: "border-l-warning" },
+  unknown: { label: "UNKNOWN", badgeBg: "bg-muted-foreground", borderColor: "border-l-muted-foreground" },
 };
 
 export function EpisodeCards({ episodes, task, run, sourcePath }: Props) {
@@ -33,7 +33,7 @@ export function EpisodeCards({ episodes, task, run, sourcePath }: Props) {
             key={ep.episodeDir}
             href={`/episode/${encodeURIComponent(task)}/${encodeURIComponent(run)}/${encodeURIComponent(ep.episodeDir)}${sourceQuery}`}
           >
-            <div className={`cursor-pointer bg-card border border-border border-l-2 ${cfg.borderColor} rounded-sm hover:bg-[#252535] transition-colors`}>
+            <div className={`cursor-pointer bg-card border border-border border-l-2 ${cfg.borderColor} rounded-sm hover:bg-accent transition-colors`}>
               <div className="p-4">
                 <div className="relative aspect-video bg-card rounded-sm mb-2 overflow-hidden">
                   {ep.hasImages ? (
@@ -50,7 +50,7 @@ export function EpisodeCards({ episodes, task, run, sourcePath }: Props) {
                     </div>
                   )}
                   <div className="absolute top-1.5 right-1.5">
-                    <span className={`${cfg.badgeBg} text-[#0A0A0F] text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-sm`}>
+                    <span className={`${cfg.badgeBg} text-background text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-sm`}>
                       {cfg.label}
                     </span>
                   </div>
