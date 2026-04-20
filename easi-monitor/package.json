@@ -1,11 +1,12 @@
 {
   "name": "easi-monitor",
-  "version": "0.1.0",
+  "version": "0.10.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "build:prod": "NEXT_DIST_DIR=.next-prod next build",
+    "start": "NEXT_DIST_DIR=.next-prod next start",
     "lint": "eslint"
   },
   "dependencies": {

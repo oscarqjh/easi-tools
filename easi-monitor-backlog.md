@@ -140,7 +140,7 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [x] Error states in all hooks (useOverview, useRuns, useEpisodes, useTrajectory, useEpisodeMeta)
 - [x] Error UI in all pages (red text on API failure instead of infinite loading)
 - [ ] Switch to async fs.promises in API routes for better concurrency (deferred)
-- [ ] Replace hardcoded hex colors with CSS custom properties where possible (deferred)
+- [x] Replace hardcoded hex colors with CSS custom properties where possible
 
 ## Extensibility (Complete)
 - [x] Task-specific config: `monitor.yaml` tasks section keyed by prefix (maps_dir, datasets_dir per-task)

@@ -1,5 +1,21 @@
 # easi-monitor Changelog
 
+## [0.10.0] - 2026-04-19
+
+### Added
+- Cross-task compare on `/compare/[task]/[ep]`: accepts `leftTask` / `rightTask` query params for per-side task selection (e.g., baseline vs mirror run)
+- Dual task + run dropdowns per side (replaces single run dropdown row)
+- `CROSS-TASK` warning badge on breadcrumb when `leftTask !== rightTask`
+- Per-side task name label above each metadata panel
+- Episode-missing banner: warns when current episode is absent from a selected run and dropdown navigation uses episode-id intersection of both sides
+- Instruction fetch falls back to right-side run when left is missing
+- Unified refactor: `<SideSelector>` component for dual dropdowns
+
+### Changed
+- `FrameViewer` / `MapOverlay` / `useTrajectory` / `useEpisodeMeta` / `useRuns` / `useEpisodes` / `/api/run` calls now use per-side task on the compare page
+- `updateRun` / `updateTask` / episode navigation preserve `leftTask` / `rightTask` query params
+- Path-based URL `/compare/[task]/[ep]?left=A&right=B` still works: both sides default to the path task when query params are absent
+
 ## [0.9.0] - 2026-04-19
 
 ### Added
