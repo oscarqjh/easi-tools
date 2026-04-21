@@ -139,7 +139,7 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [x] AdmZip instance caching per zip path (5min TTL)
 - [x] Error states in all hooks (useOverview, useRuns, useEpisodes, useTrajectory, useEpisodeMeta)
 - [x] Error UI in all pages (red text on API failure instead of infinite loading)
-- [ ] Switch to async fs.promises in API routes for better concurrency (deferred)
+- [x] Switch to async fs.promises in `discoverEpisodes` (tier 1 perf fix)
 - [x] Replace hardcoded hex colors with CSS custom properties where possible
 
 ## Extensibility (Complete)

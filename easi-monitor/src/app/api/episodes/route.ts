@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return NextResponse.json(discoverEpisodes(logsDir, safeTask, safeRun));
+    return NextResponse.json(await discoverEpisodes(logsDir, safeTask, safeRun));
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Unknown error" }, { status: 500 });
   }

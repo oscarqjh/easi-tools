@@ -1,5 +1,10 @@
 # easi-monitor Changelog
 
+## [0.11.1] - 2026-04-21
+
+### Changed
+- `discoverEpisodes` rewritten async with `fs/promises` + bounded-concurrency fan-out (64 parallel eps). Uses `result.num_steps` for step count and a cheap has-images probe (stat step_0000_front.png / step_0000.png / images.zip) instead of listing each episode directory (which on the train GT run was ~1500 symlinks × 414 eps). Cold load on the 414-ep train GT run dropped from multi-second to ~700 ms; baseline eval runs unchanged. Response shape identical.
+
 ## [0.11.0] - 2026-04-20
 
 ### Added
