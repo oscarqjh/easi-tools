@@ -185,31 +185,58 @@ def _resolve_trajectory_path(
 ) -> tuple[Path | None, str]:
     """Return ``(trajectory_dir, gt_status)`` for an episode.
 
-    ``gt_status`` is one of:
-      - ``"success"`` — a generated trajectory where the controller reached every target
-      - ``"fail"``    — a generated trajectory that geometrically missed (only returned
-                        when ``include_failures`` is true)
-      - ``"missing"`` — no mapping entry exists for this episode
+    The ``result`` field in ``path_mapping.json`` is **stale** — many rows
+    tagged ``fail`` now have a ``success/`` subdir on disk because
+    trajectory generation was retried later. So we use ``path_mapping``
+    only to locate the task directory (via ``new_path``) and probe the
+    filesystem directly for ``success/trial_*`` (preferred) or, when
+    ``include_failures`` is true, ``fail/trial_*``.
+
+    Returns ``gt_status``:
+      - ``"success"`` — a success trial exists on disk
+      - ``"fail"``    — only a fail trial exists (and ``include_failures`` enabled)
+      - ``"missing"`` — nothing usable on disk for this episode
     """
     key = (episode["scene"], episode["instruction"])
     candidates = mapping_idx.get(key, [])
     if not candidates:
         return None, "missing"
 
-    success_rows = [r for r in candidates if r.get("result") == "success"]
-    if success_rows:
-        chosen, status = success_rows, "success"
-    elif include_failures:
-        chosen, status = candidates, "fail"
-    else:
-        return None, "missing"
+    # Extract unique task dirs from candidate new_paths (strip result/trial suffix).
+    task_dirs: list[Path] = []
+    for row in candidates:
+        new_path = row.get("new_path", "")
+        # Expected shape: '<scene>/<task>/<success|fail>/trial_N'
+        parts = new_path.rsplit("/", 2)
+        if len(parts) >= 3:
+            task_dir = traj_root / parts[0]
+        else:
+            task_dir = (traj_root / new_path).parent.parent
+        if task_dir not in task_dirs:
+            task_dirs.append(task_dir)
 
-    if len(chosen) > 1:
-        logger.warning(
-            "Multiple trajectories for (scene=%s, instruction=%r): %d — picking first",
-            episode["scene"], episode["instruction"][:60], len(chosen),
+    def _first_trial(base: Path) -> Path | None:
+        if not base.is_dir():
+            return None
+        trials = sorted(
+            (d for d in base.iterdir() if d.is_dir() and d.name.startswith("trial_")),
+            key=lambda d: d.name,
         )
-    return traj_root / chosen[0]["new_path"], status
+        return trials[0] if trials else None
+
+    # Prefer any success trial across candidate task dirs.
+    for task_dir in task_dirs:
+        trial = _first_trial(task_dir / "success")
+        if trial is not None:
+            return trial, "success"
+
+    if include_failures:
+        for task_dir in task_dirs:
+            trial = _first_trial(task_dir / "fail")
+            if trial is not None:
+                return trial, "fail"
+
+    return None, "missing"
 
 
 def _parse_step_dirs(trial_dir: Path) -> list[tuple[int, str, str, Path]]:
