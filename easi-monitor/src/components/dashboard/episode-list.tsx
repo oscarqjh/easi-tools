@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Columns2 } from "lucide-react";
 import type { EpisodeInfo } from "@/types/easi";
-import { getEpisodeStatus } from "@/lib/episode-utils";
+import { getEpisodeStatus, getSubtaskInfo, anyEpisodeHasSubtasks, SUBTASK_TINT_CLASS } from "@/lib/episode-utils";
 
 interface Props {
   episodes: EpisodeInfo[];
@@ -31,6 +31,7 @@ function StatusBadge({ status }: { status: string }) {
 export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
   const router = useRouter();
   const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
+  const showSubtasks = anyEpisodeHasSubtasks(episodes);
 
   // Handle row navigation. Middle-click / Ctrl / Cmd / Shift open in a new tab.
   function navigate(href: string, e: React.MouseEvent) {
@@ -50,6 +51,9 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
         <thead>
           <tr className="border-b bg-popover">
             <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Status</th>
+            {showSubtasks && (
+              <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Subtasks</th>
+            )}
             <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Episode</th>
             <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Instruction</th>
             <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Steps</th>
@@ -60,13 +64,14 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
         <tbody>
           {episodes.length === 0 ? (
             <tr>
-              <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+              <td colSpan={showSubtasks ? 7 : 6} className="px-4 py-8 text-center text-muted-foreground">
                 No episodes match the current filters.
               </td>
             </tr>
           ) : (
             episodes.map((ep, idx) => {
               const status = getEpisodeStatus(ep);
+              const subtask = getSubtaskInfo(ep);
               const instruction = ep.result?.instruction ?? "";
               const steps = ep.result?.num_steps as number | undefined;
               const time = ep.result?.elapsed_seconds;
@@ -80,15 +85,24 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
                   onMouseDown={(e) => { if (e.button === 1) e.preventDefault(); }}
                 >
                   <td className="px-4 py-2"><StatusBadge status={status} /></td>
+                  {showSubtasks && (
+                    subtask !== null ? (
+                      <td className={`px-4 py-2 text-right font-mono ${SUBTASK_TINT_CLASS[subtask.tint]}`}>
+                        {subtask.completed} / {subtask.total}
+                      </td>
+                    ) : (
+                      <td className="px-4 py-2 text-right text-muted-foreground">&mdash;</td>
+                    )
+                  )}
                   <td className="px-4 py-2 font-mono text-primary">{ep.episodeId}</td>
                   <td className="px-4 py-2 max-w-[400px] text-muted-foreground font-sans">
                     <span className="block truncate">{instruction}</span>
                   </td>
                   <td className="px-4 py-2 text-right font-mono">
-                    {typeof steps === "number" ? Math.round(steps) : "\u2014"}
+                    {typeof steps === "number" ? Math.round(steps) : "—"}
                   </td>
                   <td className="px-4 py-2 text-right font-mono">
-                    {typeof time === "number" ? `${Math.round(time)}s` : "\u2014"}
+                    {typeof time === "number" ? `${Math.round(time)}s` : "—"}
                   </td>
                   <td className="px-2 py-2 text-center">
                     <Link
