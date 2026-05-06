@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import type { RunConfig, EpisodeResult } from "@/types/easi";
+import { getSubtaskInfoFromResult, SUBTASK_TINT_CLASS } from "@/lib/episode-utils";
 
 interface Props {
   task: string;
@@ -50,6 +51,7 @@ export function EpisodeHeader({ task, run, ep, sourcePath, config: configProp, r
   if (!result) return null;
 
   const success = (result.task_success ?? result.success ?? 0) as number;
+  const subtask = getSubtaskInfoFromResult(result);
 
   return (
     <div className="border rounded-sm p-4 space-y-3">
@@ -67,6 +69,11 @@ export function EpisodeHeader({ task, run, ep, sourcePath, config: configProp, r
       <div className="flex flex-wrap gap-2 text-xs">
         {typeof result.num_steps === "number" && <Badge variant="outline">{Math.round(result.num_steps as number)} steps</Badge>}
         {typeof result.elapsed_seconds === "number" && <Badge variant="outline">{Math.round(result.elapsed_seconds)}s</Badge>}
+        {subtask && (
+          <Badge variant="outline">
+            <span className={SUBTASK_TINT_CLASS[subtask.tint]}>Subtasks: {subtask.completed} / {subtask.total}</span>
+          </Badge>
+        )}
         <span className="w-px h-4 bg-border self-center" />
         {result.llm_usage && (
           <>
