@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { EpisodeInfo } from "@/types/easi";
-import { getEpisodeStatus } from "@/lib/episode-utils";
+import { getEpisodeStatus, getSubtaskInfo, SUBTASK_TINT_CLASS } from "@/lib/episode-utils";
 
 interface Props {
   episodes: EpisodeInfo[];
@@ -27,6 +27,7 @@ export function EpisodeCards({ episodes, task, run, sourcePath }: Props) {
       {episodes.map((ep) => {
         const status = getEpisodeStatus(ep);
         const steps = ep.result?.num_steps as number | undefined;
+        const subtask = getSubtaskInfo(ep);
         const cfg = statusConfig[status] ?? statusConfig.unknown;
         return (
           <Link
@@ -56,6 +57,11 @@ export function EpisodeCards({ episodes, task, run, sourcePath }: Props) {
                   </div>
                 </div>
                 <div className="font-mono text-sm">{ep.episodeId}</div>
+                {subtask !== null && (
+                  <div className={`text-xs mt-1 font-mono ${SUBTASK_TINT_CLASS[subtask.tint]}`}>
+                    {subtask.completed} / {subtask.total} subtasks
+                  </div>
+                )}
                 <div className="text-xs text-muted-foreground mt-1 font-sans">
                   {typeof steps === "number" ? `${Math.round(steps)} steps` : ""}
                 </div>
