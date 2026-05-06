@@ -1,4 +1,4 @@
-import type { EpisodeInfo } from "@/types/easi";
+import type { EpisodeInfo, EpisodeResult } from "@/types/easi";
 
 export function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -46,4 +46,74 @@ export function formatRunLabel(runId: string, modelPath?: string | null): string
   }
 
   return runId;
+}
+
+/** Return type for subtask helpers */
+export interface SubtaskInfo {
+  completed: number;
+  total: number;
+  tint: "full" | "partial" | "zero" | "none";
+}
+
+/**
+ * Tailwind text-color class for each tint.
+ * All three UI surfaces must import and use this map — no inline tint logic in components.
+ */
+export const SUBTASK_TINT_CLASS: Record<"full" | "partial" | "zero" | "none", string> = {
+  full: "text-success",
+  partial: "text-warning",
+  zero: "text-destructive",
+  none: "text-muted-foreground",
+};
+
+/**
+ * Canonical subtask helper — accepts EpisodeResult directly.
+ * Used by EpisodeHeader (which only has EpisodeResult | null, not EpisodeInfo).
+ *
+ * Returns null when:
+ *   - result is null / undefined
+ *   - either num_subtasks or subtasks_completed is absent
+ *   - either field is not a finite number
+ *
+ * Tint classification order (total === 0 must be checked FIRST so 0/0 → "none", not "full"):
+ *   total === 0                    → "none"
+ *   completed === total (total > 0) → "full"
+ *   completed === 0  (total > 0)   → "zero"
+ *   otherwise                      → "partial"
+ */
+export function getSubtaskInfoFromResult(result: EpisodeResult | null | undefined): SubtaskInfo | null {
+  if (!result) return null;
+  const total = result.num_subtasks;
+  const completed = result.subtasks_completed;
+  if (total === undefined || completed === undefined) return null;
+  if (typeof total !== "number" || !isFinite(total)) return null;
+  if (typeof completed !== "number" || !isFinite(completed)) return null;
+
+  let tint: "full" | "partial" | "zero" | "none";
+  if (total === 0) {
+    tint = "none";
+  } else if (completed === total) {
+    tint = "full";
+  } else if (completed === 0) {
+    tint = "zero";
+  } else {
+    tint = "partial";
+  }
+
+  return { completed, total, tint };
+}
+
+/**
+ * Thin wrapper for components that receive EpisodeInfo objects (EpisodeList, EpisodeCards).
+ */
+export function getSubtaskInfo(ep: EpisodeInfo): SubtaskInfo | null {
+  return getSubtaskInfoFromResult(ep.result);
+}
+
+/**
+ * Returns true when at least one episode in the array has subtask data.
+ * Used by EpisodeList to decide whether to render the SUBTASKS column at all.
+ */
+export function anyEpisodeHasSubtasks(eps: EpisodeInfo[]): boolean {
+  return eps.some((ep) => getSubtaskInfo(ep) !== null);
 }
