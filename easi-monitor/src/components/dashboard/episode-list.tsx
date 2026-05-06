@@ -50,9 +50,9 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-popover">
-            <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Status</th>
+            <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground w-1 whitespace-nowrap">Status</th>
             {showSubtasks && (
-              <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Subtasks</th>
+              <th className="pl-2 pr-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground w-1 whitespace-nowrap">Subtasks</th>
             )}
             <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Episode</th>
             <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Instruction</th>
@@ -84,14 +84,14 @@ export function EpisodeList({ episodes, task, run, sourcePath }: Props) {
                   onAuxClick={(e) => { if (e.button === 1) navigate(href, e); }}
                   onMouseDown={(e) => { if (e.button === 1) e.preventDefault(); }}
                 >
-                  <td className="px-4 py-2"><StatusBadge status={status} /></td>
+                  <td className="px-4 py-2 whitespace-nowrap"><StatusBadge status={status} /></td>
                   {showSubtasks && (
                     subtask !== null ? (
-                      <td className={`px-4 py-2 text-right font-mono ${SUBTASK_TINT_CLASS[subtask.tint]}`}>
+                      <td className={`pl-2 pr-4 py-2 text-left font-mono whitespace-nowrap ${SUBTASK_TINT_CLASS[subtask.tint]}`}>
                         {subtask.completed} / {subtask.total}
                       </td>
                     ) : (
-                      <td className="px-4 py-2 text-right text-muted-foreground">&mdash;</td>
+                      <td className="pl-2 pr-4 py-2 text-left text-muted-foreground whitespace-nowrap">&mdash;</td>
                     )
                   )}
                   <td className="px-4 py-2 font-mono text-primary">{ep.episodeId}</td>
