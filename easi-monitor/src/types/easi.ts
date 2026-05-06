@@ -101,6 +101,8 @@ export interface EpisodeResult {
   elapsed_seconds: number;
   forced_early_stop: boolean;
   llm_usage?: LLMUsage;
+  num_subtasks?: number;
+  subtasks_completed?: number;
   [key: string]: unknown;
 }
 
