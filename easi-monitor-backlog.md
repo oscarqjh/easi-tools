@@ -182,6 +182,18 @@ Pre-generate HM3D top-down maps offline, then overlay robot trajectory in real-t
 - [ ] Live watcher log streaming (SSE or websocket)
 - [ ] Process management: PID state file, re-attach on restart
 
+## Subtask Success Count Display
+Surface `subtasks_completed / num_subtasks` from `result.json` in episode list table, card grid, and trajectory page header. Spec: `docs/specs/2026-05-06-easi-monitor-subtask-count-design.md`.
+
+- [x] Spec written + reviewed
+- [x] Implementation plan
+- [x] `EpisodeResult` type extension (`num_subtasks`, `subtasks_completed`)
+- [x] `getSubtaskInfoFromResult` + `getSubtaskInfo` + `anyEpisodeHasSubtasks` helpers in `episode-utils.ts`
+- [x] `EpisodeList`: conditional SUBTASKS column between Status and Episode
+- [x] `EpisodeCards`: per-card subtask line under episodeId
+- [x] `EpisodeHeader`: static `Subtasks: C / T` outline badge
+- [ ] Manual smoke test on LHPR-VLN run + non-VLN run (pending user verification in dev server)
+
 ## Ideas (Unscoped)
 - Authentication / multi-user support
 - Real-time monitoring (watch for new runs while app is open)

@@ -1,5 +1,14 @@
 # easi-monitor Changelog
 
+## [0.12.0] - 2026-05-06
+
+### Added
+- Subtask success count display: episode list table shows a conditional SUBTASKS column (hidden when no episode has subtask data) with tinted `"C / T"` fractions — green for full completion, amber for partial, coral for zero, muted for `0/0`
+- Episode card grid shows a per-card `"C / T subtasks"` line below the episode ID with matching tint; hidden on individual cards that lack subtask data
+- Trajectory `EpisodeHeader` shows a static `Subtasks: C / T` outline badge alongside Steps/Time badges; badge does not respond to step scrubbing
+- `getSubtaskInfoFromResult`, `getSubtaskInfo`, `anyEpisodeHasSubtasks`, and `SUBTASK_TINT_CLASS` exported from `src/lib/episode-utils.ts` as the single source of tint classification; no tint logic in components
+- `num_subtasks?: number` and `subtasks_completed?: number` optional typed fields added to `EpisodeResult` interface
+
 ## [0.11.1] - 2026-04-21
 
 ### Changed
