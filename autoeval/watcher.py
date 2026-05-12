@@ -452,13 +452,14 @@ def _signal_handler(signum, frame):
     sys.exit(0)
 
 
-def main() -> None:
+def main(config_path: Path | None = None) -> None:
     global _running_proc
 
     from autoeval.config import load_config, build_easi_cmd_base, ConfigError
 
-    args = parse_args()
-    config_path = Path(args.config)
+    if config_path is None:
+        args = parse_args()
+        config_path = Path(args.config)
 
     # Initial load — exit on failure
     try:
@@ -472,6 +473,14 @@ def main() -> None:
     signal.signal(signal.SIGTERM, _signal_handler)
 
     _log(f"Watcher started: config={config_path}")
+
+    # Startup sweep: recover orphaned runs (completed eval but TSV append
+    # never fired — e.g. prior watcher killed mid-post-processing).
+    try:
+        _log("Startup repair sweep...")
+        run_repair(config, dry_run=False, move=True)
+    except Exception as e:
+        _log(f"Startup repair failed (continuing): {e}")
 
     while True:
         # Reload config at the start of each cycle
@@ -572,6 +581,122 @@ def main() -> None:
 
         _log(f"Nothing pending. Next scan in {scan_interval}s...")
         time.sleep(scan_interval)
+
+
+def _tsv_has_any_path(tsv_path: Path, candidate_paths: set[str]) -> bool:
+    """Return True if any line in the TSV has Results_Path matching a candidate."""
+    if not tsv_path.exists():
+        return False
+    try:
+        lines = tsv_path.read_text().strip().split("\n")
+    except OSError:
+        return False
+    for line in lines[1:]:
+        fields = line.split("\t")
+        if len(fields) > 1 and fields[1] in candidate_paths:
+            return True
+    return False
+
+
+def run_repair(config: dict, dry_run: bool = False, move: bool = True) -> None:
+    """Reprocess completed runs that are not yet in the benchmark TSV.
+
+    For each task in config['tasks'], scan output_dir/<task>/ for runs with
+    summary.json. If the run's Results_Path (either pre-move or post-move) is
+    not already in the benchmark TSV for its profile, extract metrics, move
+    to results_dir (unless move=False), and append the row.
+    """
+    from autoeval.benchmark import (
+        extract_metrics, append_benchmark_row, get_benchmark_tsv_path,
+    )
+    from autoeval.profiles import get_profile
+
+    output_dir = Path(config["output_dir"])
+    results_dir = Path(config["results_dir"]) if config.get("results_dir") else None
+    zip_images = config.get("zip_images", False)
+    zip_all_images = config.get("zip_all_images", False)
+    task_names = config.get("tasks") or []
+
+    if not task_names:
+        _log("No tasks configured; nothing to repair.")
+        return
+
+    total_found = 0
+    total_appended = 0
+    total_skipped = 0
+
+    for task_name in task_names:
+        task_dir = output_dir / task_name
+        if not task_dir.is_dir():
+            continue
+
+        profile = get_profile(task_name)
+        tsv_path = get_benchmark_tsv_path(str(output_dir), profile.PROFILE_NAME)
+
+        for run_dir in sorted(task_dir.iterdir()):
+            if not run_dir.is_dir():
+                continue
+            if not (run_dir / "summary.json").exists():
+                continue
+            if not (run_dir / "config.json").exists():
+                continue
+
+            would_be_dest = (
+                results_dir / task_name / run_dir.name if results_dir else run_dir
+            )
+            candidate_paths = {
+                str(run_dir.resolve()),
+                str(would_be_dest.resolve()),
+            }
+
+            if _tsv_has_any_path(tsv_path, candidate_paths):
+                total_skipped += 1
+                continue
+
+            total_found += 1
+            _log(f"[repair] {task_name}/{run_dir.name}: missing from TSV")
+
+            if dry_run:
+                continue
+
+            try:
+                profile_name, row = extract_metrics(run_dir)
+            except Exception as e:
+                _log(f"  extract_metrics failed: {e}")
+                continue
+
+            final_path = str(run_dir.resolve())
+            if move and results_dir:
+                if would_be_dest.exists():
+                    _log(f"  dest already exists, using that path: {would_be_dest}")
+                    final_path = str(would_be_dest.resolve())
+                else:
+                    try:
+                        _move_run_to_results(
+                            run_dir, would_be_dest,
+                            zip_images=zip_images, zip_all_images=zip_all_images,
+                        )
+                        final_path = str(would_be_dest.resolve())
+                        _log(f"  moved to {would_be_dest}")
+                    except Exception as e:
+                        _log(f"  move failed: {e}")
+
+            row["Results_Path"] = final_path
+            try:
+                added = append_benchmark_row(tsv_path, row, profile.COLUMNS)
+                if added:
+                    total_appended += 1
+                    _log(f"  appended to {tsv_path}")
+                else:
+                    _log(f"  duplicate, skipped")
+            except Exception as e:
+                _log(f"  TSV append failed: {e}")
+
+    verb = "would append" if dry_run else "appended"
+    _log(
+        f"Repair done: {total_found} missing, {total_appended} {verb}, "
+        f"{total_skipped} already in TSV"
+    )
 
 
 if __name__ == "__main__":
