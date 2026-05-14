@@ -73,6 +73,9 @@ export function discoverRuns(logsDir: string, taskName: string): RunInfoBase[] {
     if (hasSummary) {
       try { summary = JSON.parse(fs.readFileSync(summaryPath, "utf-8")); } catch { /* skip */ }
     }
+    // running iff no readable summary.json — a present-but-unparseable file
+    // also counts as running because we can't trust the run is finished.
+    const runState: RunInfo["runState"] = hasSummary && summary !== null ? "completed" : "running";
 
     const dateMatch = entry.name.match(/^(\d{8})_(\d{6})/);
     const date = dateMatch
@@ -81,7 +84,7 @@ export function discoverRuns(logsDir: string, taskName: string): RunInfoBase[] {
 
     const model = config?.cli_options?.model ?? entry.name;
 
-    runs.push({ runId: entry.name, model, date, hasSummary, summary, config });
+    runs.push({ runId: entry.name, model, date, hasSummary, runState, summary, config });
   }
   const result = runs.sort((a, b) => b.date.localeCompare(a.date));
   runsCache.set(cacheKey, result, 10_000);
@@ -156,8 +159,10 @@ async function scanEpisode(epDir: string, name: string): Promise<EpisodeInfo> {
 
 export async function discoverEpisodes(
   logsDir: string, taskName: string, runId: string,
+  opts?: { requireResult?: boolean },
 ): Promise<EpisodeInfo[]> {
-  const cacheKey = `episodes:${logsDir}:${taskName}:${runId}`;
+  const requireResult = opts?.requireResult === true;
+  const cacheKey = `episodes:${logsDir}:${taskName}:${runId}:${requireResult ? "r" : "all"}`;
   const cached = episodesCache.get(cacheKey);
   if (cached) return cached;
 
@@ -187,8 +192,9 @@ export async function discoverEpisodes(
     }
   });
 
-  episodesCache.set(cacheKey, episodes, 30_000);
-  return episodes;
+  const filtered = requireResult ? episodes.filter((e) => e.result !== null) : episodes;
+  episodesCache.set(cacheKey, filtered, 30_000);
+  return filtered;
 }
 
 export function readTrajectory(logsDir: string, taskName: string, runId: string, episodeDir: string): TrajectoryStep[] {
