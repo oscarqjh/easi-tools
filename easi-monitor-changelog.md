@@ -1,5 +1,25 @@
 # easi-monitor Changelog
 
+## [0.13.0] - 2026-05-14
+
+### Added
+- Homepage **Running** section above Recent Runs lists every run whose directory has a valid EASI `config.json` but no `summary.json`. Hidden when zero such runs exist. Rows are clickable and use the same columns as Recent Runs minus the success-rate cell (running runs have no metrics yet)
+- `RUNNING` badge (amber pill) in the run-detail page breadcrumb when the run has no readable `summary.json`
+- Run detail page for an in-progress run filters the episode list to only episodes that already have a parseable `result.json` — currently-executing and queued episodes are hidden entirely (rather than showing "unknown" status rows)
+- `RunInfo.runState: "completed" | "running"` typed field as the single source of truth for live-vs-finished status; `OverviewData.runningRuns: RecentRun[]` returned alongside `recentRuns`
+- `discoverEpisodes(..., { requireResult: true })` filter that excludes episodes without a parseable `result.json`. Cache key partitioned by the flag (`:r` / `:all`) so filtered and unfiltered variants never collide
+- `/api/episodes?requireResult=1` query param plumbing through to `useEpisodes(task, run, sourcePath, requireResult)` hook
+- New `RunningBadge` component in `src/components/ui/`
+
+### Changed
+- `/api/overview` routes running runs into their own `runningRuns` array; the existing `recentRuns` is now completed-only
+- `discoverRuns` derives `runState`: a run with `summary.json` present but unparseable is treated as `running` (we can't trust the run is finished if the summary doesn't parse)
+
+### Notes
+- No EASI Python runner changes — feature is purely consumer-side
+- No polling / SSE / websocket — manual browser refresh is the refresh model (deliberate, can revisit if needed)
+- Crashed runs that never wrote `summary.json` will show as `RUNNING` indefinitely (acceptable trade for v1)
+
 ## [0.12.0] - 2026-05-06
 
 ### Added

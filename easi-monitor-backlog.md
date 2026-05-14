@@ -194,6 +194,31 @@ Surface `subtasks_completed / num_subtasks` from `result.json` in episode list t
 - [x] `EpisodeHeader`: static `Subtasks: C / T` outline badge
 - [ ] Manual smoke test on LHPR-VLN run + non-VLN run (pending user verification in dev server)
 
+## Phase 7: In-Progress Run Viewing (Complete)
+Inspect already-completed episodes of a still-running EASI eval, without partial-metric aggregation, polling, or writer-side changes. Spec: `docs/specs/2026-05-14-easi-monitor-running-runs-design.md`. Plan: `docs/plans/2026-05-14-easi-monitor-running-runs.md`.
+
+- [x] Spec + plan
+- [x] `RunInfo.runState` typed field; `OverviewData.runningRuns` array
+- [x] `discoverRuns` derives `runState` (running iff summary.json missing or unparseable)
+- [x] `discoverEpisodes({ requireResult: true })` filter + cache-key partitioning
+- [x] `/api/overview` routes running runs into `runningRuns`; `recentRuns` is now completed-only
+- [x] `/api/episodes?requireResult=1` query param
+- [x] `useEpisodes(..., requireResult)` hook param
+- [x] `RunningBadge` component
+- [x] Run detail page: filters episode list + renders `RUNNING` badge for in-progress runs
+- [x] Homepage `Running` section above Recent Runs
+- [x] Code review (approved, no Critical/Important issues)
+- [ ] Manual smoke test on real in-progress run (pending user verification in dev server)
+
+### Deferred follow-ups
+- Auto-refresh / polling / SSE for live updates (manual refresh works fine for v1)
+- Partial summary aggregation (ep count / success-so-far) on running runs
+- Stale-run detection (a run that crashed without writing summary.json shows as `RUNNING` indefinitely)
+- Extract shared `<RunsTable>` for Running + Recent Runs (60-line duplication)
+- WCAG contrast tighten on amber `RunningBadge` (`text-amber-600 dark:text-amber-400`)
+- `runningRuns` capped at 50; UI shows uncapped length count (silent undercount at 51+)
+- Silent-source bug: `discoverTasks` returns `[]` when a configured source is unreadable (e.g. permission denied); should log a warning so the user can debug from logs instead of from symptoms
+
 ## Ideas (Unscoped)
 - Authentication / multi-user support
 - Real-time monitoring (watch for new runs while app is open)
