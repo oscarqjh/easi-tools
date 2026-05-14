@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useOverview } from "@/lib/hooks";
 import { timeAgo } from "@/lib/episode-utils";
 import { Inbox } from "lucide-react";
+import { RunningBadge } from "@/components/ui/running-badge";
 
 function OverviewSkeleton() {
   return (
@@ -152,6 +153,67 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      {/* Running runs */}
+      {data.runningRuns.length > 0 && (
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-3 flex items-center gap-2">
+            Running
+            <span className="text-muted-foreground/70 normal-case tracking-normal font-sans">
+              ({data.runningRuns.length})
+            </span>
+          </div>
+          <div className="border border-border rounded-sm overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-popover">
+                  <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Task</th>
+                  {hasMultipleSources && (
+                    <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Source</th>
+                  )}
+                  <th className="px-4 py-2 text-left text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Model</th>
+                  <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Status</th>
+                  <th className="px-4 py-2 text-right text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Started</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.runningRuns.map((run, idx) => {
+                  const href = `/task/${encodeURIComponent(run.task)}/${encodeURIComponent(run.runId)}?source=${encodeURIComponent(run.sourcePath)}`;
+                  const navigate = (e: React.MouseEvent) => {
+                    if (e.button === 1 || e.ctrlKey || e.metaKey || e.shiftKey) {
+                      window.open(href, "_blank", "noopener,noreferrer");
+                      e.preventDefault();
+                      return;
+                    }
+                    router.push(href);
+                  };
+                  return (
+                    <tr
+                      key={`${run.sourcePath}:${run.task}-${run.runId}`}
+                      className={`border-b border-border hover:bg-accent transition-colors cursor-pointer ${idx % 2 === 1 ? "bg-card" : "bg-transparent"}`}
+                      onClick={navigate}
+                      onAuxClick={(e) => { if (e.button === 1) navigate(e); }}
+                      onMouseDown={(e) => { if (e.button === 1) e.preventDefault(); }}
+                    >
+                      <td className="px-4 py-2 font-mono text-primary text-xs">{run.task}</td>
+                      {hasMultipleSources && (
+                        <td className="px-4 py-2 text-xs text-muted-foreground">{run.source}</td>
+                      )}
+                      <td className="px-4 py-2 font-mono text-xs">{run.model}</td>
+                      <td className="px-4 py-2 text-right">
+                        <RunningBadge />
+                      </td>
+                      <td className="px-4 py-2 text-right text-xs text-muted-foreground">
+                        {timeAgo(run.date)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Recent runs table */}
       <div>
