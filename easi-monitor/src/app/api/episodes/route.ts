@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return NextResponse.json(await discoverEpisodes(logsDir, safeTask, safeRun));
+    const requireResult = request.nextUrl.searchParams.get("requireResult") === "1";
+    return NextResponse.json(await discoverEpisodes(logsDir, safeTask, safeRun, { requireResult }));
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Unknown error" }, { status: 500 });
   }
