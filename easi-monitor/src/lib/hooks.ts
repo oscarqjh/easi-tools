@@ -59,7 +59,12 @@ export function useRuns(task: string | null, sourcePath: string | null) {
   return { runs, loading, error };
 }
 
-export function useEpisodes(task: string | null, run: string | null, sourcePath: string | null) {
+export function useEpisodes(
+  task: string | null,
+  run: string | null,
+  sourcePath: string | null,
+  requireResult: boolean = false,
+) {
   const [episodes, setEpisodes] = useState<EpisodeInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +74,7 @@ export function useEpisodes(task: string | null, run: string | null, sourcePath:
     setError(null);
     const params = new URLSearchParams({ task, run });
     if (sourcePath) params.set("source", sourcePath);
+    if (requireResult) params.set("requireResult", "1");
     fetch(`/api/episodes?${params.toString()}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -77,7 +83,7 @@ export function useEpisodes(task: string | null, run: string | null, sourcePath:
       .then(setEpisodes)
       .catch((e) => setError(e instanceof Error ? e.message : "Unknown error"))
       .finally(() => setLoading(false));
-  }, [task, run, sourcePath]);
+  }, [task, run, sourcePath, requireResult]);
   return { episodes, loading, error };
 }
 
