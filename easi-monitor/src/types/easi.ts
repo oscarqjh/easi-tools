@@ -131,6 +131,7 @@ export interface RunInfo {
   model: string;
   date: string;
   hasSummary: boolean;
+  runState: "completed" | "running";
   summary: RunSummary | null;
   config: RunConfig | null;
   source: string;
@@ -158,6 +159,7 @@ export interface OverviewData {
   maxSuccessRate: number;
   tasks: OverviewTask[];
   recentRuns: RecentRun[];
+  runningRuns: RecentRun[];
 }
 
 export interface OverviewTask {
