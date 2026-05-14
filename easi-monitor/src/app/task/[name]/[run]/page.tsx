@@ -13,6 +13,7 @@ import {
 } from "@/components/dashboard/episode-filters";
 import { getEpisodeStatus, formatRunLabel } from "@/lib/episode-utils";
 import { Home, ChevronRight, Inbox } from "lucide-react";
+import { RunningBadge } from "@/components/ui/running-badge";
 import type { RunSummary, RunConfig, EpisodeInfo } from "@/types/easi";
 
 function MetricsSkeleton() {
@@ -57,12 +58,13 @@ export default function RunDetailPage() {
   const sourceQuery = sourcePath ? `?source=${encodeURIComponent(sourcePath)}` : "";
   const sourceParam = sourcePath ? `&source=${encodeURIComponent(sourcePath)}` : "";
 
-  const { episodes, loading: episodesLoading, error: episodesError } = useEpisodes(taskName, runId, sourcePath);
-  const { episodes: datasetEpisodes } = useDatasetEpisodes(taskName, runId, sourcePath);
-
   const [summary, setSummary] = useState<RunSummary | null>(null);
   const [config, setConfig] = useState<RunConfig | null>(null);
   const [runLoading, setRunLoading] = useState(true);
+
+  const isRunning = !runLoading && summary === null;
+  const { episodes, loading: episodesLoading, error: episodesError } = useEpisodes(taskName, runId, sourcePath, isRunning);
+  const { episodes: datasetEpisodes } = useDatasetEpisodes(taskName, runId, sourcePath);
 
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -148,6 +150,7 @@ export default function RunDetailPage() {
         </Link>
         <ChevronRight className="size-3.5" />
         <span className="font-mono text-foreground">{runLabel}</span>
+        {isRunning && <RunningBadge />}
       </div>
 
       {/* Metrics panel */}
