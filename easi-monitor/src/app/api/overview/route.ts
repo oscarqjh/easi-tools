@@ -9,6 +9,7 @@ export async function GET() {
 
     const tasks: OverviewTask[] = [];
     const allRuns: RecentRun[] = [];
+    const runningRuns: RecentRun[] = [];
 
     let totalEpisodes = 0;
     let srMax = 0;
@@ -72,7 +73,7 @@ export async function GET() {
             }
           }
 
-          allRuns.push({
+          const entry: RecentRun = {
             task: taskInfo.name,
             runId: run.runId,
             model: run.model,
@@ -82,13 +83,20 @@ export async function GET() {
             hasSummary: run.hasSummary,
             source: source.name,
             sourcePath: source.path,
-          });
+          };
+
+          if (run.runState === "running") {
+            runningRuns.push(entry);
+          } else {
+            allRuns.push(entry);
+          }
         }
       }
     }
 
     // Sort all runs by date descending, take top 20
     allRuns.sort((a, b) => b.date.localeCompare(a.date));
+    runningRuns.sort((a, b) => b.date.localeCompare(a.date));
     const recentRuns = allRuns.slice(0, 20);
 
     const result: OverviewData = {
@@ -98,6 +106,7 @@ export async function GET() {
       maxSuccessRate: srMax,
       tasks,
       recentRuns,
+      runningRuns: runningRuns.slice(0, 50),
     };
 
     return NextResponse.json(result);
